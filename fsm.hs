@@ -31,7 +31,7 @@ fsmConcat m1 m2 = if isDisjoint (states m1) (states m2)
                              , start  = start m1
                              , finish = finish m2 
                              }
-                    else error "FSM.concat: State sets are not disjoint."
+                    else error "FSM.fsmConcat: State sets are not disjoint."
 
     where newName = name m1 ++ name m2
           bridge  = Set.fromList [(p,a,q) | p <- Set.toList (finish m1), a <- [Nothing], q <- [start m2]]
@@ -45,7 +45,7 @@ fsmUnion m1 m2 = if isDisjoint (states m1) (states m2)
                              , start  = newStart
                              , finish = Set.singleton newFinish 
                              }
-                    else error "FSM.union: State sets are not disjoint."
+                    else error "FSM.fsmUnion: State sets are not disjoint."
 
     where newName   = name m1 ++ "+" ++ name m2
           newStart  = "S_" ++ newName
