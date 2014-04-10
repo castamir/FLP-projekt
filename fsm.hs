@@ -1,3 +1,10 @@
+module FSM
+( FSM(..)
+, fsmConcat
+, fsmUnion
+, fsmIter
+)where
+
 import qualified Data.Set as Set
 
 type Symbol = Maybe Char
@@ -47,7 +54,7 @@ fsmUnion m1 m2 = if isDisjoint (states m1) (states m2)
           join      = Set.fromList [(p,a,q) | p <- Set.toList $ Set.union (finish m1) (finish m2), a <- [Nothing], q <- [newFinish]]
 
 fsmIter :: FSM -> FSM
-fsmIter m = FSM { name   = newName
+fsmIter m = FSM {  name   = newName
                 , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) (states m)
                 , alph   = alph m
                 , rules  = Set.union bypass $ Set.union loop (rules m)
@@ -61,7 +68,7 @@ fsmIter m = FSM { name   = newName
           bypass    = Set.singleton (newStart, Nothing, newFinish)
           loop      = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Nothing], q <- [start m]]
 
-fsm_a = FSM { name   = "a"
+test_fsm_a = FSM { name   = "a"
             , states = Set.fromList ["a1", "a2"]
             , alph   = Set.fromList [Just 'a']
             , rules  = Set.fromList [("a1", Just 'a', "a2")]
@@ -69,7 +76,7 @@ fsm_a = FSM { name   = "a"
             , finish = Set.fromList ["a2"]
             }
 
-fsm_b = FSM { name   = "b"
+test_fsm_b = FSM { name   = "b"
             , states = Set.fromList ["b1", "b2"]
             , alph   = Set.fromList [Just 'b']
             , rules  = Set.fromList [("b1", Just 'b', "b2")]
