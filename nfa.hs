@@ -1,8 +1,8 @@
-module FSM
-( FSM(..)
-, fsmConcat
-, fsmUnion
-, fsmIter
+module NFA
+( NFA(..)
+, nfaConcat
+, nfaUnion
+, nfaIter
 )where
 
 import qualified Data.Set as Set
@@ -11,7 +11,7 @@ type Symbol = Maybe Char
 type State  = String
 type Rule   = (State, Symbol, State)
 
-data FSM = FSM  { name   :: String
+data NFA = NFA  { name   :: String
                 , states :: Set.Set State
                 , alph   :: Set.Set Symbol
                 , rules  :: Set.Set Rule
@@ -22,30 +22,30 @@ data FSM = FSM  { name   :: String
 isDisjoint :: Ord a => Set.Set a -> Set.Set a -> Bool
 isDisjoint s1 s2 = Set.null $ Set.intersection s1 s2
 
-fsmConcat :: FSM -> FSM -> FSM
-fsmConcat m1 m2 = if isDisjoint (states m1) (states m2)
-                    then FSM { name   = newName
+nfaConcat :: NFA -> NFA -> NFA
+nfaConcat m1 m2 = if isDisjoint (states m1) (states m2)
+                    then NFA { name   = newName
                              , states = Set.union (states m1) (states m2)
                              , alph   = Set.union (alph m1) (alph m2)
                              , rules  = Set.union bridge $ Set.union (rules m1) (rules m2)
                              , start  = start m1
                              , finish = finish m2 
                              }
-                    else error "FSM.fsmConcat: State sets are not disjoint."
+                    else error "NFA.concat: State sets are not disjoint."
 
     where newName = name m1 ++ name m2
           bridge  = Set.fromList [(p,a,q) | p <- Set.toList (finish m1), a <- [Nothing], q <- [start m2]]
 
-fsmUnion :: FSM -> FSM -> FSM
-fsmUnion m1 m2 = if isDisjoint (states m1) (states m2)
-                    then FSM { name   = newName
+nfaUnion :: NFA -> NFA -> NFA
+nfaUnion m1 m2 = if isDisjoint (states m1) (states m2)
+                    then NFA { name   = newName
                              , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) $ Set.union (states m1) (states m2)
                              , alph   = Set.union (alph m1) (alph m2)
                              , rules  = Set.union fork $ Set.union join $ Set.union (rules m1) (rules m2)
                              , start  = newStart
                              , finish = Set.singleton newFinish 
                              }
-                    else error "FSM.fsmUnion: State sets are not disjoint."
+                    else error "NFA.union: State sets are not disjoint."
 
     where newName   = name m1 ++ "+" ++ name m2
           newStart  = "S_" ++ newName
@@ -53,8 +53,8 @@ fsmUnion m1 m2 = if isDisjoint (states m1) (states m2)
           fork      = Set.fromList [(newStart, Nothing, start m1), (newStart, Nothing, start m2)]
           join      = Set.fromList [(p,a,q) | p <- Set.toList $ Set.union (finish m1) (finish m2), a <- [Nothing], q <- [newFinish]]
 
-fsmIter :: FSM -> FSM
-fsmIter m = FSM { name   = newName
+nfaIter :: NFA -> NFA
+nfaIter m = NFA {  name   = newName
                 , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) (states m)
                 , alph   = alph m
                 , rules  = Set.union bypass $ Set.union loop (rules m)
@@ -68,7 +68,7 @@ fsmIter m = FSM { name   = newName
           bypass    = Set.singleton (newStart, Nothing, newFinish)
           loop      = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Nothing], q <- [start m]]
 
-test_fsm_a = FSM { name   = "a"
+test_nfa_a = NFA { name   = "a"
             , states = Set.fromList ["a1", "a2"]
             , alph   = Set.fromList [Just 'a']
             , rules  = Set.fromList [("a1", Just 'a', "a2")]
@@ -76,7 +76,7 @@ test_fsm_a = FSM { name   = "a"
             , finish = Set.fromList ["a2"]
             }
 
-test_fsm_b = FSM { name   = "b"
+test_nfa_b = NFA { name   = "b"
             , states = Set.fromList ["b1", "b2"]
             , alph   = Set.fromList [Just 'b']
             , rules  = Set.fromList [("b1", Just 'b', "b2")]
