@@ -54,7 +54,7 @@ nfaUnion m1 m2 = if isDisjoint (states m1) (states m2)
           join      = Set.fromList [(p,a,q) | p <- Set.toList $ Set.union (finish m1) (finish m2), a <- [Nothing], q <- [newFinish]]
 
 nfaIter :: NFA -> NFA
-nfaIter m = NFA {  name   = newName
+nfaIter m = NFA { name   = newName
                 , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) (states m)
                 , alph   = alph m
                 , rules  = Set.union bypass $ Set.union loop (rules m)
@@ -69,17 +69,17 @@ nfaIter m = NFA {  name   = newName
           loop      = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Nothing], q <- [start m]]
 
 test_nfa_a = NFA { name   = "a"
-            , states = Set.fromList ["a1", "a2"]
-            , alph   = Set.fromList [Just 'a']
-            , rules  = Set.fromList [("a1", Just 'a', "a2")]
-            , start  = "a1"
-            , finish = Set.fromList ["a2"]
-            }
+                 , states = Set.fromList ["a1", "a2"]
+                 , alph   = Set.fromList [Just 'a']
+                 , rules  = Set.fromList [("a1", Just 'a', "a2")]
+                 , start  = "a1"
+                 , finish = Set.fromList ["a2"]
+                 }
 
 test_nfa_b = NFA { name   = "b"
-            , states = Set.fromList ["b1", "b2"]
-            , alph   = Set.fromList [Just 'b']
-            , rules  = Set.fromList [("b1", Just 'b', "b2")]
-            , start  = "b1"
-            , finish = Set.fromList ["b2"]
-            }
+                 , states = Set.fromList ["b1", "b2"]
+                 , alph   = Set.fromList [Just 'b']
+                 , rules  = Set.fromList [("b1", Just 'b', "b2")]
+                 , start  = "b1"
+                 , finish = Set.fromList ["b2"]
+                 }
