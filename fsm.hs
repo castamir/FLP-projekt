@@ -54,7 +54,7 @@ fsmUnion m1 m2 = if isDisjoint (states m1) (states m2)
           join      = Set.fromList [(p,a,q) | p <- Set.toList $ Set.union (finish m1) (finish m2), a <- [Nothing], q <- [newFinish]]
 
 fsmIter :: FSM -> FSM
-fsmIter m = FSM {  name   = newName
+fsmIter m = FSM { name   = newName
                 , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) (states m)
                 , alph   = alph m
                 , rules  = Set.union bypass $ Set.union loop (rules m)
