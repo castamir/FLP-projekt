@@ -32,22 +32,34 @@ fsmConcat m1 m2 = if isDisjoint (states m1) (states m2)
 fsmUnion :: FSM -> FSM -> FSM
 fsmUnion m1 m2 = if isDisjoint (states m1) (states m2)
                     then FSM { name   = newName
-                             , states = Set.union (Set.singleton newStart) $ Set.union newFinish $ Set.union (states m1) (states m2)
+                             , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) $ Set.union (states m1) (states m2)
                              , alph   = Set.union (alph m1) (alph m2)
                              , rules  = Set.union fork $ Set.union join $ Set.union (rules m1) (rules m2)
                              , start  = newStart
-                             , finish = newFinish 
+                             , finish = Set.singleton newFinish 
                              }
                     else error "FSM.union: State sets are not disjoint."
 
     where newName   = name m1 ++ "+" ++ name m2
           newStart  = "S_" ++ newName
-          newFinish = Set.singleton ("F_" ++ newName)
+          newFinish = "F_" ++ newName
           fork      = Set.fromList [(newStart, Nothing, start m1), (newStart, Nothing, start m2)]
-          join      = Set.fromList [(p,a,q) | p <- Set.toList $ Set.union (finish m1) (finish m2), a <- [Nothing], q <- Set.toList newFinish]
+          join      = Set.fromList [(p,a,q) | p <- Set.toList $ Set.union (finish m1) (finish m2), a <- [Nothing], q <- [newFinish]]
 
---fsmIteration :: FSM -> FSM -> FSM
---fsmIteration m1 = 
+fsmIter :: FSM -> FSM
+fsmIter m = FSM {  name   = newName
+                , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) (states m)
+                , alph   = alph m
+                , rules  = Set.union bypass $ Set.union loop (rules m)
+                , start  = newStart
+                , finish = Set.singleton newFinish 
+                }
+
+    where newName   = name m ++ "*"
+          newStart  = "S_" ++ newName
+          newFinish = "F_" ++ newName
+          bypass    = Set.singleton (newStart, Nothing, newFinish)
+          loop      = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Nothing], q <- [start m]]
 
 fsm_a = FSM { name   = "a"
             , states = Set.fromList ["a1", "a2"]
