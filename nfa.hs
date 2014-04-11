@@ -1,10 +1,11 @@
 module NFA
 ( NFA(..)
-, nfaConcat
-, nfaUnion
-, nfaIter
+, concat
+, union
+, iter
 )where
 
+import Prelude hiding (concat)
 import qualified Data.Set as Set
 
 type Symbol = Maybe (Set.Set Char)
@@ -22,8 +23,8 @@ data NFA = NFA { name   :: String
 isDisjoint :: Ord a => Set.Set a -> Set.Set a -> Bool
 isDisjoint s1 s2 = Set.null $ Set.intersection s1 s2
 
-nfaConcat :: NFA -> NFA -> NFA
-nfaConcat m1 m2 = if isDisjoint (states m1) (states m2)
+concat :: NFA -> NFA -> NFA
+concat m1 m2 = if isDisjoint (states m1) (states m2)
                     then NFA { name   = newName
                              , states = Set.union (states m1) (states m2)
                              , alph   = Set.union (alph m1) (alph m2)
@@ -31,13 +32,13 @@ nfaConcat m1 m2 = if isDisjoint (states m1) (states m2)
                              , start  = start m1
                              , finish = finish m2 
                              }
-                    else error "NFA.nfaConcat: State sets are not disjoint."
+                    else error "NFA.concat: State sets are not disjoint."
 
     where newName = name m1 ++ name m2
           bridge  = Set.fromList [(p,a,q) | p <- Set.toList (finish m1), a <- [Nothing], q <- [start m2]]
 
-nfaUnion :: NFA -> NFA -> NFA
-nfaUnion m1 m2 = if isDisjoint (states m1) (states m2)
+union :: NFA -> NFA -> NFA
+union m1 m2 = if isDisjoint (states m1) (states m2)
                     then NFA { name   = newName
                              , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) $ Set.union (states m1) (states m2)
                              , alph   = Set.union (alph m1) (alph m2)
@@ -45,7 +46,7 @@ nfaUnion m1 m2 = if isDisjoint (states m1) (states m2)
                              , start  = newStart
                              , finish = Set.singleton newFinish 
                              }
-                    else error "NFA.nfaUnion: State sets are not disjoint."
+                    else error "NFA.union: State sets are not disjoint."
 
     where newName   = name m1 ++ "+" ++ name m2
           newStart  = "S_" ++ newName
@@ -53,16 +54,16 @@ nfaUnion m1 m2 = if isDisjoint (states m1) (states m2)
           fork      = Set.fromList [(newStart, Nothing, start m1), (newStart, Nothing, start m2)]
           join      = Set.fromList [(p,a,q) | p <- Set.toList $ Set.union (finish m1) (finish m2), a <- [Nothing], q <- [newFinish]]
 
-nfaIter :: NFA -> NFA
-nfaIter m = NFA { name   = newName
-                , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) (states m)
-                , alph   = alph m
-                , rules  = Set.union bypass $ Set.union loop (rules m)
-                , start  = newStart
-                , finish = Set.singleton newFinish 
-                }
+iter :: NFA -> NFA
+iter m = NFA { name   = newName
+             , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) (states m)
+             , alph   = alph m
+             , rules  = Set.union bypass $ Set.union loop (rules m)
+             , start  = newStart
+             , finish = Set.singleton newFinish 
+             }
 
-    where newName   = name m ++ "*"
+    where newName   = if length (name m) > 1 then "(" ++ name m ++ ")*" else name m ++ "*"
           newStart  = "S_" ++ newName
           newFinish = "F_" ++ newName
           bypass    = Set.singleton (newStart, Nothing, newFinish)
