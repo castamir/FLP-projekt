@@ -8,13 +8,13 @@ module NFA
 import Prelude hiding (concat)
 import qualified Data.Set as Set
 
-type Symbol = Maybe (Set.Set Char)
-type State  = String
-type Rule   = (State, Symbol, State)
+type State      = String
+type Transition = Maybe (Set.Set Char)
+type Rule       = (State, Transition, State)
 
 data NFA = NFA { name   :: String
                , states :: Set.Set State
-               , alph   :: Set.Set Symbol
+               , alph   :: Set.Set Char
                , rules  :: Set.Set Rule
                , start  :: State
                , finish :: Set.Set State
@@ -58,7 +58,7 @@ iter :: NFA -> NFA
 iter m = NFA { name   = newName
              , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) (states m)
              , alph   = alph m
-             , rules  = Set.union bypass $ Set.union loop (rules m)
+             , rules  = Set.union bypass $ Set.union loop $ Set.union toFinish $ Set.union fromStart (rules m)
              , start  = newStart
              , finish = Set.singleton newFinish 
              }
@@ -66,12 +66,14 @@ iter m = NFA { name   = newName
     where newName   = if length (name m) > 1 then "(" ++ name m ++ ")*" else name m ++ "*"
           newStart  = "S_" ++ newName
           newFinish = "F_" ++ newName
+          fromStart = Set.singleton (newStart, Nothing, start m)
+          toFinish  = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Nothing], q <- [newFinish]]
           bypass    = Set.singleton (newStart, Nothing, newFinish)
           loop      = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Nothing], q <- [start m]]
 
 test_nfa_a = NFA { name   = "a"
                  , states = Set.fromList ["a1", "a2"]
-                 , alph   = Set.fromList [Just (Set.singleton 'a')]
+                 , alph   = Set.singleton 'a'
                  , rules  = Set.fromList [("a1", Just (Set.singleton 'a'), "a2")]
                  , start  = "a1"
                  , finish = Set.fromList ["a2"]
@@ -79,7 +81,7 @@ test_nfa_a = NFA { name   = "a"
 
 test_nfa_b = NFA { name   = "b"
                  , states = Set.fromList ["b1", "b2"]
-                 , alph   = Set.fromList [Just (Set.singleton 'b')]
+                 , alph   = Set.singleton 'b'
                  , rules  = Set.fromList [("b1", Just (Set.singleton 'b'), "b2")]
                  , start  = "b1"
                  , finish = Set.fromList ["b2"]
