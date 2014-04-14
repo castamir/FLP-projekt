@@ -9,7 +9,7 @@ import Prelude hiding (concat)
 import qualified Data.Set as Set
 
 type State      = String
-type Transition = Maybe (Set.Set Char)
+type Transition = Set.Set Char
 type Rule       = (State, Transition, State)
 
 data NFA = NFA { name   :: String
@@ -35,7 +35,7 @@ concat m1 m2 = if isDisjoint (states m1) (states m2)
                     else error "NFA.concat: State sets are not disjoint."
 
     where newName = name m1 ++ name m2
-          bridge  = Set.fromList [(p,a,q) | p <- Set.toList (finish m1), a <- [Nothing], q <- [start m2]]
+          bridge  = Set.fromList [(p,a,q) | p <- Set.toList (finish m1), a <- [Set.empty], q <- [start m2]]
 
 union :: NFA -> NFA -> NFA
 union m1 m2 = if isDisjoint (states m1) (states m2)
@@ -51,8 +51,8 @@ union m1 m2 = if isDisjoint (states m1) (states m2)
     where newName   = name m1 ++ "+" ++ name m2
           newStart  = "S_" ++ newName
           newFinish = "F_" ++ newName
-          fork      = Set.fromList [(newStart, Nothing, start m1), (newStart, Nothing, start m2)]
-          join      = Set.fromList [(p,a,q) | p <- Set.toList $ Set.union (finish m1) (finish m2), a <- [Nothing], q <- [newFinish]]
+          fork      = Set.fromList [(newStart, Set.empty, start m1), (newStart, Set.empty, start m2)]
+          join      = Set.fromList [(p,a,q) | p <- Set.toList $ Set.union (finish m1) (finish m2), a <- [Set.empty], q <- [newFinish]]
 
 iter :: NFA -> NFA
 iter m = NFA { name   = newName
@@ -66,15 +66,15 @@ iter m = NFA { name   = newName
     where newName   = if length (name m) > 1 then "(" ++ name m ++ ")*" else name m ++ "*"
           newStart  = "S_" ++ newName
           newFinish = "F_" ++ newName
-          fromStart = Set.singleton (newStart, Nothing, start m)
-          toFinish  = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Nothing], q <- [newFinish]]
-          bypass    = Set.singleton (newStart, Nothing, newFinish)
-          loop      = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Nothing], q <- [start m]]
+          fromStart = Set.singleton (newStart, Set.empty, start m)
+          toFinish  = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Set.empty], q <- [newFinish]]
+          bypass    = Set.singleton (newStart, Set.empty, newFinish)
+          loop      = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Set.empty], q <- [start m]]
 
 test_nfa_a = NFA { name   = "a"
                  , states = Set.fromList ["a1", "a2"]
                  , alph   = Set.singleton 'a'
-                 , rules  = Set.fromList [("a1", Just (Set.singleton 'a'), "a2")]
+                 , rules  = Set.fromList [("a1", Set.singleton 'a', "a2")]
                  , start  = "a1"
                  , finish = Set.fromList ["a2"]
                  }
@@ -82,7 +82,7 @@ test_nfa_a = NFA { name   = "a"
 test_nfa_b = NFA { name   = "b"
                  , states = Set.fromList ["b1", "b2"]
                  , alph   = Set.singleton 'b'
-                 , rules  = Set.fromList [("b1", Just (Set.singleton 'b'), "b2")]
+                 , rules  = Set.fromList [("b1", Set.singleton 'b', "b2")]
                  , start  = "b1"
                  , finish = Set.fromList ["b2"]
                  }
