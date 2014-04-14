@@ -23,6 +23,7 @@ data DFA = DFA { name   :: String
 notDisjoint :: Ord a => Set.Set a -> Set.Set a -> Bool
 notDisjoint s1 s2 = not $ Set.null $ Set.intersection s1 s2
 
+-- Nepouzivat! Vraci nekompletni reflexivni uzaver !
 reflxClosure :: Ord a => Set.Set (a,a) -> Set.Set (a,a)
 reflxClosure s = Set.union s $ Set.fromList [(fst a, fst a) | a <- Set.toList s]
 
