@@ -1,6 +1,6 @@
 module DFA
 ( DFA(..)
---, nfa2dfa
+, nfa2dfa
 )where
 
 import qualified Data.Set  as Set
@@ -69,7 +69,7 @@ genStatesAll nfa ss = if ss == new_ss
     where new_ss = Set.union ss $ genStates nfa ss
 
 genRulesStep :: NFA -> SuperState -> Set.Set Rule
-genRulesStep nfa ss =  Set.fromList $ zipWith (\(p,_,q) s -> (p,s,q)) groupedRules $ map (Set.fromList . rules2symbols) groupedRules
+genRulesStep nfa ss = Set.fromList $ zipWith (\(p,_,q) s -> (p,s,q)) (map head groupedRules) $ map (Set.fromList . rules2symbols) groupedRules
     
     where newRules      = Set.map (\x -> (ss, x, deltaSupState nfa ss x)) (NFA.alph nfa)
           groupedRules  = List.groupBy (\(_,_,q1) (_,_,q2) -> q1 == q2) $ Set.toList newRules
@@ -78,19 +78,20 @@ genRulesStep nfa ss =  Set.fromList $ zipWith (\(p,_,q) s -> (p,s,q)) groupedRul
 genRules :: NFA -> Set.Set SuperState -> Set.Set Rule
 genRules nfa ss = Set.foldr Set.union Set.empty $ Set.map (genRulesStep nfa) ss
 
---nfa2dfa :: NFA -> DFA
---nfa2dfa nfa = DFA { DFA.name   = NFA.name nfa
---                  , DFA.start  = newStart
---                  , DFA.states = newStates
---                  , DFA.rules  = newRules
---                  , DFA.alph   = NFA.alph nfa
---                  , DFA.finish = newFinish
---                  } $ nfaEpsClosure nfa
+nfa2dfa :: NFA -> DFA
+nfa2dfa  nfa = nfa2dfa' $ nfaEpsClosure nfa
+nfa2dfa' nfa = DFA { DFA.name   = NFA.name nfa
+                   , DFA.start  = newStart
+                   , DFA.states = newStates
+                   , DFA.rules  = newRules
+                   , DFA.alph   = NFA.alph nfa
+                   , DFA.finish = newFinish
+                   }
 
---    where newStart  = epsClosureState NFA.start nfa
---          newStates = genStatesAll (Set.singleton newStart)
---          newRules  = genRules newStates
---          newFinish = Set.filter (notDisjoint $ NFA.finish nfa) newStates
+    where newStart  = epsClosureState nfa $ NFA.start nfa
+          newStates = genStatesAll nfa $ Set.singleton newStart
+          newRules  = genRules nfa newStates
+          newFinish = Set.filter (notDisjoint $ NFA.finish nfa) newStates
 
 test_rel = Set.fromList [(1,2),(2,3),(3,4)]
 
