@@ -4,7 +4,7 @@ import System.Console.GetOpt
 import qualified Data.Set as Set
 import qualified Data.List as List
 import DFA 
-import Interpreter (mfaInterpret)
+import Interpreter (mfaInterpret,findTrap)
 ------------------------------------------------------------------------------
 data Flag = Invert | PrintMFA
   deriving (Show, Eq)
