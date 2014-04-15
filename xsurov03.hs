@@ -16,7 +16,7 @@ type Rule       = (SuperState, Transition, SuperState)
 test_dfa = DFA { DFA.name   = "borek"
                , DFA.states = Set.map Set.fromList $ Set.fromList [["a","b"],["a","c"], ["b", "c"], ["d"], ["f"]]
                , DFA.alph   = Set.fromList ['a','b','c','d']
-               , DFA.rules  = Set.fromList [(Set.fromList ["a","b"], Set.singleton 'b', Set.fromList ["f"])]
+               , DFA.rules  = Set.fromList [(Set.fromList ["a","b"], Set.fromList ['b','c','d','e','6'], Set.fromList ["f"])]
                , DFA.start  = Set.fromList ["a", "b"]
                , DFA.finish = Set.map Set.fromList $ Set.fromList [["b","c"],["f"]]
                }
@@ -62,25 +62,48 @@ states2string :: [(SuperState, String)] -> String
 states2string xs = names2string $ map snd xs
 
 ------------------------------------------------------------------------------
-rangeStr :: [String] -> [Char] -> [String]
-rangeStr xs [] = xs
-rangeStr xs (c:[]) = [[c]]
-rangeStr xs (c:cs) = rangeStr' xs c cs
+rangeStr :: String -> [String]
+rangeStr [] = []
+rangeStr (c:[]) = [[c]]
+rangeStr (c:cs) = rangeStr' [] [c] cs
 
-rangeStr' :: [String] -> Char -> [Char] -> [String]
-rangeStr' xs p [] = xs ++ [[p]]
-rangeStr' xs p (c1:[])
-rangeStr' xs p (c1:c2:[]) =
-  if succ p == c1
-    then rangeStr' xs p (c2:cs)
-    else rangeStr' (xs ++ [p:])
--- rangeStr' xs p (c:[]) = 
--- rangeStr' xs (c:d:cs) = xs ++ [[c]]
+--------------------------------------
+rangeStr' :: [String] -> String -> String -> [String]
+rangeStr' xs [] [] = xs
+rangeStr' xs ys []
+  | length ys > 3 = xs ++ [head ys:'-':last ys:[]]
+  | otherwise     = xs ++ [ys]
 
+rangeStr' xs ys (c:cs) =
+  if succ (last ys) == c
+    then rangeStr' xs (ys ++ [c]) cs
+    else if length ys > 2
+      then rangeStr' (xs ++ [head ys:'-':last ys:[]]) [c] cs
+      else rangeStr' (xs ++ [ys]) [c] cs
+
+------------------------------------------------------------------------------
+padding :: String -> Int -> String
+padding xs i  
+  | length xs >= i  = xs
+  | otherwise = xs ++ [s | s <- " ", y <- [0..(i - length xs)]]
+
+------------------------------------------------------------------------------
+printRules :: [(SuperState, String)] -> [Rule] -> IO ()
+printRules states ((src, symbols, dst):rs) = do
+  putStr $ "  " ++ padding (head $ findNames [src] states) 5
+  putStr $ "| " ++ padding (head $ findNames [dst] states) 5
+  putStrLn  $ "| " ++ strSymb
+  if length rs == 0
+    then return ()
+    else printRules states rs
+  where
+      strSymb = names2string $ rangeStr $ Set.toList symbols
+
+------------------------------------------------------------------------------
+char_list = ['a','b','c','d','g','k','l','m','n','o','x','y','z']
 ------------------------------------------------------------------------------
 printMFA :: DFA -> IO ()
 printMFA mfa = do 
-  let istates = renameMFA_states $ DFA.states mfa
   putStr "States:        "
   putStrLn $ states2string istates
   putStr "Alphabet:      "
@@ -90,14 +113,12 @@ printMFA mfa = do
   putStr "Finish states: "
   putStrLn $ names2string $ findNames ( Set.toList (DFA.finish mfa)) istates
   putStrLn "Rules:"
-  putStrLn " Source | Dest.| Symbols"
+  putStrLn " Source | Dest. | Symbols"
   putStrLn "------------------------------"
-  putStrLn "  q011  | q123 | hlakjdh"
-  putStrLn ""
-  --print_states $ DFA.states mfa
-  --print_alph $ DFA.alph mfa
-  --print_rules
-  --print_states $ [DFA.start mfa]
+  printRules istates $ Set.toList $ DFA.rules mfa 
+  putStrLn "------------------------------"
+  where
+    istates = renameMFA_states $ DFA.states mfa
 
 ------------------------------------------------------------------------------
 executeSimpleGrep :: String -> Handle -> IO ()
