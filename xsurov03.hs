@@ -4,6 +4,7 @@ import System.Console.GetOpt
 import qualified Data.Set as Set
 import qualified Data.List as List
 import DFA 
+import Interpreter (mfaInterpret)
 ------------------------------------------------------------------------------
 data Flag = Invert | PrintMFA
   deriving (Show, Eq)
@@ -120,42 +121,12 @@ printMFA mfa = do
   where
     istates = renameMFA_states $ DFA.states mfa
 
-
-------------------------------------------------------------------------------
-findTrap :: [Rule] -> Set.Set SuperState -> Set.Set Char -> SuperState
-findTrap [] _ _ = Set.singleton ['_'] -- trap doesn't exists, so return special Superstate
-findTrap ((p, r, q):rs) fs cs
-  | r == cs && p == q && Set.member p fs == False  = p
-  | otherwise  = findTrap rs fs cs
-
------------------------------------------------------------------------------
-findNextState :: SuperState->  Char -> [Rule] -> SuperState
-findNextState state symbol [] = error "findNextState: not found next state"
-findNextState state symbol ((p, a, q):rs)
-  | state == p && Set.member symbol a == True = q
-  | otherwise = findNextState state symbol rs
-
 ------------------------------------------------------------------------------
 matchLine :: String -> DFA -> Bool
 matchLine cs mfa 
   | cs == []  = mfaInterpret cs (DFA.start mfa) mfa
   | mfaInterpret cs (DFA.start mfa) mfa == False = matchLine (tail cs) mfa
   | otherwise = True
-
-------------------------------------------------------------------------------
-mfaInterpret :: String -> SuperState -> DFA -> Bool
-mfaInterpret [] state mfa = Set.member state $ DFA.finish mfa
-mfaInterpret (c:cs) state mfa
-  | Set.member state fins == True  = True
-  | state == trap                  = False
-  | Set.member c alph == False = mfaInterpret cs state mfa
-  | otherwise = mfaInterpret cs nextState mfa
-  where 
-    fins = DFA.finish mfa
-    rules = Set.toList $ DFA.rules mfa
-    nextState = findNextState state c rules
-    alph = DFA.alph mfa
-    trap = findTrap rules fins alph
 
 ------------------------------------------------------------------------------
 executeSimpleGrep :: DFA -> Handle -> IO ()
