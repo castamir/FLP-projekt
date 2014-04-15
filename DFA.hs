@@ -1,6 +1,7 @@
 module DFA
 ( DFA(..)
 , nfa2dfa
+, test_nfa
 )where
 
 import qualified Data.Set  as Set
@@ -137,3 +138,4 @@ test_nfa_b3 = NFA { NFA.name   = "b"
                   }
 
 test_nfa = NFA.concat (NFA.iter $ NFA.union test_nfa_a1 test_nfa_b1) $ NFA.concat test_nfa_a2 $ NFA.concat test_nfa_b2 test_nfa_b3
+

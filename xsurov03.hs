@@ -13,7 +13,9 @@ type SuperState = Set.Set State
 type Transition = Set.Set Char
 type Rule       = (SuperState, Transition, SuperState)
 
-test_dfa = DFA { DFA.name   = "borek"
+test_dfa = nfa2dfa test_nfa
+
+test_dfa1 = DFA { DFA.name   = "borek"
                , DFA.states = Set.map Set.fromList $ Set.fromList [["a","b"],["a","c"], ["b", "c"], ["d"], ["f"]]
                , DFA.alph   = Set.fromList ['a','b','c','d']
                , DFA.rules  = Set.fromList [(Set.fromList ["a","b"], Set.fromList ['b','c','d','e','6'], Set.fromList ["f"])]
@@ -100,8 +102,6 @@ printRules states ((src, symbols, dst):rs) = do
       strSymb = names2string $ rangeStr $ Set.toList symbols
 
 ------------------------------------------------------------------------------
-char_list = ['a','b','c','d','g','k','l','m','n','o','x','y','z']
-------------------------------------------------------------------------------
 printMFA :: DFA -> IO ()
 printMFA mfa = do 
   putStr "States:        "
@@ -120,17 +120,56 @@ printMFA mfa = do
   where
     istates = renameMFA_states $ DFA.states mfa
 
+
 ------------------------------------------------------------------------------
-executeSimpleGrep :: String -> Handle -> IO ()
-executeSimpleGrep _mfa handle = do
-  -- nacti radek zavolej funkci
+findTrap :: [Rule] -> Set.Set SuperState -> Set.Set Char -> SuperState
+findTrap [] _ _ = Set.singleton ['_'] -- trap doesn't exists, so return special Superstate
+findTrap ((p, r, q):rs) fs cs
+  | r == cs && p == q && Set.member p fs == False  = p
+  | otherwise  = findTrap rs fs cs
+
+-----------------------------------------------------------------------------
+findNextState :: SuperState->  Char -> [Rule] -> SuperState
+findNextState state symbol [] = error "findNextState: not found next state"
+findNextState state symbol ((p, a, q):rs)
+  | state == p && Set.member symbol a == True = q
+  | otherwise = findNextState state symbol rs
+
+------------------------------------------------------------------------------
+matchLine :: String -> DFA -> Bool
+matchLine cs mfa 
+  | cs == []  = mfaInterpret cs (DFA.start mfa) mfa
+  | mfaInterpret cs (DFA.start mfa) mfa == False = matchLine (tail cs) mfa
+  | otherwise = True
+
+------------------------------------------------------------------------------
+mfaInterpret :: String -> SuperState -> DFA -> Bool
+mfaInterpret [] state mfa = Set.member state $ DFA.finish mfa
+mfaInterpret (c:cs) state mfa
+  | Set.member state fins == True  = True
+  | state == trap                  = False
+  | Set.member c alph == False = mfaInterpret cs state mfa
+  | otherwise = mfaInterpret cs nextState mfa
+  where 
+    fins = DFA.finish mfa
+    rules = Set.toList $ DFA.rules mfa
+    nextState = findNextState state c rules
+    alph = DFA.alph mfa
+    trap = findTrap rules fins alph
+
+------------------------------------------------------------------------------
+executeSimpleGrep :: DFA -> Handle -> IO ()
+executeSimpleGrep mfa handle = do
+  -- get line and match regexp by MFA
   ieof <- hIsEOF handle
   if ieof
     then return ()
     else do
       line <- hGetLine handle
-      putStrLn line
-      executeSimpleGrep _mfa handle
+      if matchLine line mfa == False
+        then return ()
+        else putStrLn line
+      executeSimpleGrep mfa handle
 ------------------------------------------------------------------------------
 main = do
     -- get parameters
@@ -145,10 +184,10 @@ main = do
         if length nonOpt == 2
           then do -- input data from file
             handle <- openFile (last nonOpt) ReadMode
-            executeSimpleGrep "lala" handle 
+            executeSimpleGrep test_dfa handle 
             hClose handle
           else -- input data from stdin
-            executeSimpleGrep "lala" stdin
+            executeSimpleGrep test_dfa stdin
 
     return 0
 
