@@ -49,9 +49,11 @@ getParams argv =
         emsg2 = "Too many arguments!\n"
 ------------------------------------------------------------------------------
 ------------------------------------------------------------------------------
-renameMFA_states :: Set.Set SuperState -> [(SuperState, String)]
-renameMFA_states states = map renameMFA_states' $ zip (Set.toList states) [0..]
-renameMFA_states' (x,y) = (x, "q" ++ show y)
+renameMFA_states :: Set.Set SuperState -> SuperState -> [(SuperState, String)]
+renameMFA_states states trap = map (renameMFA_states' trap) $ zip (Set.toList states) [0..]
+renameMFA_states' trap (x,y)
+  | x == trap = (x, "trap")
+  | otherwise = (x, "q" ++ show y)
 ------------------------------------------------------------------------------
 findNames :: [SuperState] -> [(SuperState, String)] -> [String]
 findNames xs ixs = List.sort [y | z <- xs, (x,y) <- ixs, z == x]
@@ -108,10 +110,10 @@ printMFA mfa = do
   putStr "States:        "
   putStrLn $ states2string istates
   putStr "Alphabet:      "
-  putStrLn $ names2string $ [List.intersperse ',' $ Set.toList $ DFA.alph mfa]
+  putStrLn $ names2string $ List.intersperse "," $ rangeStr $ Set.toList $ DFA.alph mfa
   putStr "Start state:   "
   putStrLn $ head $ findNames [DFA.start mfa] istates
-  putStr "Finish states: "
+  putStr "Final states:  "
   putStrLn $ names2string $ findNames ( Set.toList (DFA.finish mfa)) istates
   putStrLn "Rules:"
   putStrLn " Source | Dest. | Symbols"
@@ -119,7 +121,8 @@ printMFA mfa = do
   printRules istates $ Set.toList $ DFA.rules mfa 
   putStrLn "------------------------------"
   where
-    istates = renameMFA_states $ DFA.states mfa
+    trap = findTrap (Set.toList $ DFA.rules mfa) (DFA.finish mfa) (DFA.alph mfa)
+    istates = renameMFA_states (DFA.states mfa) trap
 
 ------------------------------------------------------------------------------
 matchLine :: String -> DFA -> Bool
