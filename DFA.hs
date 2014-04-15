@@ -73,7 +73,7 @@ genRulesStep :: NFA -> SuperState -> Set.Set Rule
 genRulesStep nfa ss = Set.fromList $ zipWith (\(p,_,q) s -> (p,s,q)) (map head groupedRules) $ map (Set.fromList . rules2symbols) groupedRules
     
     where newRules      = Set.map (\x -> (ss, x, epsClosureSet nfa $ deltaSupState nfa ss x)) (NFA.alph nfa)
-          groupedRules  = List.groupBy (\(_,_,q1) (_,_,q2) -> q1 == q2) $ Set.toList newRules
+          groupedRules  = List.groupBy (\(_,_,q1) (_,_,q2) -> q1 == q2) $ List.sortBy (\(_,_,q1) (_,_,q2) -> compare q1 q2) $ Set.toList newRules
           rules2symbols = map (\(_,a,_) -> a)
 
 genRules :: NFA -> Set.Set SuperState -> Set.Set Rule
