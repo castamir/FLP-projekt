@@ -28,7 +28,6 @@ getSet (x:xs) =
     else Set.fromList (expandList (x:xs))
 
 allowedSymbolSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "
-allowedBlockSymbolSet = "[^].|abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "
 
 
   
@@ -59,18 +58,23 @@ concatTree [] = Leaf Set.empty
 concatTree (x:'*':xs)
   | x == '.'  = Branch (Branch (Leaf (Set.fromList allowedSymbolSet)) '*' (Leaf Set.empty)) '.' (concatTree xs)
   | otherwise = Branch (Branch (Leaf (Set.singleton x)) '*' (Leaf Set.empty)) '.' (concatTree xs)
+concatTree (x:'?':xs)
+  | x == '.'  = Branch (Branch (Leaf (Set.fromList allowedSymbolSet)) '+' (Leaf Set.empty)) '.' (concatTree xs)
+  | otherwise = Branch (Branch (Leaf (Set.singleton x)) '+' (Leaf Set.empty)) '.' (concatTree xs)
 concatTree (x:xs)
   | x == '.'  = Branch (Leaf (Set.fromList allowedSymbolSet)) '.' (concatTree xs)
   | x == '['  = f (takeWhile (']'/=) xs) (dropWhile (']'/=) xs)   
   | otherwise = Branch (Leaf (Set.singleton x)) '.' (concatTree xs)
     where
       f p (']':'*':xs)  = Branch (Branch (Leaf (getSet p)) '*' (Leaf Set.empty)) '.' (concatTree xs)
+      f p (']':'*':xs)  = Branch (Branch (Leaf (getSet p)) '+' (Leaf Set.empty)) '.' (concatTree xs)
       f p (']':xs)      = Branch (Leaf (getSet p)) '.' (concatTree xs) 
 
 bracketTree [] = Leaf Set.empty
 bracketTree s@('(':xs) = f (getBracketBlockPrefix s) (getBracketBlockSuffix s)
   where
     f p ('*':xs) = Branch (Branch (unionTree p) '*' (Leaf Set.empty)) '.' (unionTree xs)
+    f p ('?':xs) = Branch (Branch (unionTree p) '+' (Leaf Set.empty)) '.' (unionTree xs)
     f p s = Branch (unionTree p) '.' (unionTree s)
 bracketTree (x:xs) = f (takeWhile ('('/=) (x:xs)) (x:xs)
   where
