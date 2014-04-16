@@ -1,67 +1,37 @@
 module MIN
-(FA(..)
-,MIN(..)
-,CLASS(..)
-, makeClass
-, makeMinimalize
+(
 ) where
---, min2fa
 
 import qualified Data.Set as Set
--- tento balast se da nekam bokem do automatu FA tady je jen protoze mi to rvalo a nechcelo se mi s tim resit
-type Symbol = Set.Set Char
-type State  = String
-type Rule   = (State, Symbol, State)
+import qualified Data.List as List
+import DFA
 
-data FA = FA { name   :: String
-              , states :: Set.Set State
-              , alph   :: Set.Set Symbol
-              , rules  :: Set.Set Rule
-              , start  :: State
-              , finish :: Set.Set State
-              } deriving (Show)
--- konec balastu 
+type State      = String
+type SuperState = Set.Set State
+type Transition = Set.Set Char
+type Rule       = (SuperState, Transition, SuperState)
+type Rules 		= Set.Set Rule
+type SimpleRule = (SuperState, Char, SuperState)
 
---import FA
+simpleRulesStep :: Rule -> [SimpleRule]
+simpleRulesStep (p,a,q) =  map (\x -> (p,x,q)) $ Set.toList a
 
-data CLASS = CLASS { classId :: Int
-					, stateField :: Set.Set State
-			 		} deriving (Show, Eq, Ord)
+simpleRules :: Rules -> [SimpleRule]
+simpleRules rls = concat $ map (simpleRulesStep) $ Set.toList rls
 
-data MIN = MIN { classC :: Set.Set CLASS
-				, rulesC :: Set.Set Rule
-				, startC :: State
-				, finishC :: Set.Set State
-				} deriving (Show, Eq)
+firstClass :: [SimpleRule] -> Set.Set SuperState -> [(Int, [SimpleRule])]
+firstClass rls finish = [(1, fst x), (2, snd x)]  
+	where 
+		x = List.partition (\(p,_,_) -> Set.member p finish) rls
 
--- prevede konecny automat FA na strukturu MIN
-makeClass :: FA -> MIN
-makeClass fa = 	MIN { classC = Set.union (Set.singleton (clsfin)) (Set.singleton (clsrest))
-					, rulesC = rules fa
-					, startC = start fa
-					, finishC = finish fa
-					} where
-						clsfin = CLASS{
-							classId = 0
-							,stateField = finish fa
-						}
-						clsrest = CLASS{
-							classId = 1
-							, stateField = Set.difference (finish fa) (states fa) 
-						}	
+newClass :: [(Int, [SimpleRule])] -> [(Int, [SimpleRule])]
+newClass cls = cls 
 
--- vezme strukturu MIN a prevede na Minimalizovanejsi verzi poku jsou 2 verze stejne tak je to vysledek				 
-makeMinimalize :: MIN -> MIN
-makeMinimalize m = m	
+--newSingleClass :: (Int, [SimpleRule]) -> [(Int, [SimpleRule])] -> [(Int, SuperState)]
+--newSingleClass cls classes = 
+	--where
+		--clsCol = filter (\(_,_,q) -> q) $ snd cls 
+		--clsStates = map () clsCol
 
--- prevod minimalizovane verze na minimalni automat
---min2fa :: MIN -> FA
---min2fa m = fa		 
-
--- provede celou minimalizaci z determinizovaneho automatu FA na minimalni automat f2
-runMin :: FA -> FA
-runMin fa = fa2 where
-			m = makeClass fa
-			m2 = makeMinimalize m
-			--fa2 = min2fa m2
-			fa2 = fa
+findClassId :: SuperState -> [(Int, [SimpleRule])] -> Int
+findClassId a classes = List.find (\(x,y) -> elem a y) classes
