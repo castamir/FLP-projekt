@@ -4,6 +4,7 @@ import System.Console.GetOpt
 import qualified Data.Set as Set
 import qualified Data.List as List
 import DFA 
+import Interpreter (mfaInterpret,findTrap)
 ------------------------------------------------------------------------------
 data Flag = Invert | PrintMFA
   deriving (Show, Eq)
@@ -13,7 +14,9 @@ type SuperState = Set.Set State
 type Transition = Set.Set Char
 type Rule       = (SuperState, Transition, SuperState)
 
-test_dfa = DFA { DFA.name   = "borek"
+test_dfa = nfa2dfa test_nfa
+
+test_dfa1 = DFA { DFA.name   = "borek"
                , DFA.states = Set.map Set.fromList $ Set.fromList [["a","b"],["a","c"], ["b", "c"], ["d"], ["f"]]
                , DFA.alph   = Set.fromList ['a','b','c','d']
                , DFA.rules  = Set.fromList [(Set.fromList ["a","b"], Set.fromList ['b','c','d','e','6'], Set.fromList ["f"])]
@@ -46,9 +49,11 @@ getParams argv =
         emsg2 = "Too many arguments!\n"
 ------------------------------------------------------------------------------
 ------------------------------------------------------------------------------
-renameMFA_states :: Set.Set SuperState -> [(SuperState, String)]
-renameMFA_states states = map renameMFA_states' $ zip (Set.toList states) [0..]
-renameMFA_states' (x,y) = (x, "q" ++ show y)
+renameMFA_states :: Set.Set SuperState -> SuperState -> [(SuperState, String)]
+renameMFA_states states trap = map (renameMFA_states' trap) $ zip (Set.toList states) [0..]
+renameMFA_states' trap (x,y)
+  | x == trap = (x, "trap")
+  | otherwise = (x, "q" ++ show y)
 ------------------------------------------------------------------------------
 findNames :: [SuperState] -> [(SuperState, String)] -> [String]
 findNames xs ixs = List.sort [y | z <- xs, (x,y) <- ixs, z == x]
@@ -100,17 +105,15 @@ printRules states ((src, symbols, dst):rs) = do
       strSymb = names2string $ rangeStr $ Set.toList symbols
 
 ------------------------------------------------------------------------------
-char_list = ['a','b','c','d','g','k','l','m','n','o','x','y','z']
-------------------------------------------------------------------------------
 printMFA :: DFA -> IO ()
 printMFA mfa = do 
   putStr "States:        "
   putStrLn $ states2string istates
   putStr "Alphabet:      "
-  putStrLn $ names2string $ [List.intersperse ',' $ Set.toList $ DFA.alph mfa]
+  putStrLn $ names2string $ List.intersperse "," $ rangeStr $ Set.toList $ DFA.alph mfa
   putStr "Start state:   "
   putStrLn $ head $ findNames [DFA.start mfa] istates
-  putStr "Finish states: "
+  putStr "Final states:  "
   putStrLn $ names2string $ findNames ( Set.toList (DFA.finish mfa)) istates
   putStrLn "Rules:"
   putStrLn " Source | Dest. | Symbols"
@@ -118,19 +121,29 @@ printMFA mfa = do
   printRules istates $ Set.toList $ DFA.rules mfa 
   putStrLn "------------------------------"
   where
-    istates = renameMFA_states $ DFA.states mfa
+    trap = findTrap (Set.toList $ DFA.rules mfa) (DFA.finish mfa) (DFA.alph mfa)
+    istates = renameMFA_states (DFA.states mfa) trap
 
 ------------------------------------------------------------------------------
-executeSimpleGrep :: String -> Handle -> IO ()
-executeSimpleGrep _mfa handle = do
-  -- nacti radek zavolej funkci
+matchLine :: String -> DFA -> Bool
+matchLine cs mfa 
+  | cs == []  = mfaInterpret cs (DFA.start mfa) mfa
+  | mfaInterpret cs (DFA.start mfa) mfa == False = matchLine (tail cs) mfa
+  | otherwise = True
+
+------------------------------------------------------------------------------
+executeSimpleGrep :: DFA -> Handle -> IO ()
+executeSimpleGrep mfa handle = do
+  -- get line and match regexp by MFA
   ieof <- hIsEOF handle
   if ieof
     then return ()
     else do
       line <- hGetLine handle
-      putStrLn line
-      executeSimpleGrep _mfa handle
+      if matchLine line mfa == False
+        then return ()
+        else putStrLn line
+      executeSimpleGrep mfa handle
 ------------------------------------------------------------------------------
 main = do
     -- get parameters
@@ -145,10 +158,10 @@ main = do
         if length nonOpt == 2
           then do -- input data from file
             handle <- openFile (last nonOpt) ReadMode
-            executeSimpleGrep "lala" handle 
+            executeSimpleGrep test_dfa handle 
             hClose handle
           else -- input data from stdin
-            executeSimpleGrep "lala" stdin
+            executeSimpleGrep test_dfa stdin
 
     return 0
 

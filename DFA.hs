@@ -1,5 +1,6 @@
 module DFA
 ( DFA(..)
+, test_nfa
 , nfa2dfa
 )where
 
@@ -51,7 +52,7 @@ epsClosureState :: NFA -> State -> Set.Set State
 epsClosureState nfa s = Set.map (\(p,a,q) -> q) $ Set.filter (\(p,a,q) -> p == s && Set.null a) (NFA.rules nfa)
 
 epsClosureSet :: NFA -> Set.Set State -> Set.Set State
-epsClosureSet nfa s = Set.foldl Set.union Set.empty $ Set.map (epsClosureState nfa) s
+epsClosureSet nfa s = Set.foldr Set.union Set.empty $ Set.map (epsClosureState nfa) s
 
 deltaSupState :: NFA -> SuperState -> Char -> SuperState
 deltaSupState nfa s x = Set.map (\(p,a,q) -> q) $ Set.filter (\(p,a,q) -> Set.member p s && Set.member x a) (NFA.rules nfa)
@@ -73,7 +74,7 @@ genRulesStep :: NFA -> SuperState -> Set.Set Rule
 genRulesStep nfa ss = Set.fromList $ zipWith (\(p,_,q) s -> (p,s,q)) (map head groupedRules) $ map (Set.fromList . rules2symbols) groupedRules
     
     where newRules      = Set.map (\x -> (ss, x, epsClosureSet nfa $ deltaSupState nfa ss x)) (NFA.alph nfa)
-          groupedRules  = List.groupBy (\(_,_,q1) (_,_,q2) -> q1 == q2) $ Set.toList newRules
+          groupedRules  = List.groupBy (\(_,_,q1) (_,_,q2) -> q1 == q2) $ List.sortBy (\(_,_,q1) (_,_,q2) -> compare q1 q2) $ Set.toList newRules
           rules2symbols = map (\(_,a,_) -> a)
 
 genRules :: NFA -> Set.Set SuperState -> Set.Set Rule
@@ -136,4 +137,15 @@ test_nfa_b3 = NFA { NFA.name   = "b"
                   , NFA.finish = Set.fromList ["b32"]
                   }
 
-test_nfa = NFA.concat (NFA.iter $ NFA.union test_nfa_a1 test_nfa_b1) $ NFA.concat test_nfa_a2 $ NFA.concat test_nfa_b2 test_nfa_b3
+--test_nfa = NFA.concat (NFA.iter $ NFA.union test_nfa_a1 test_nfa_b1) $ NFA.concat test_nfa_a2 $ NFA.concat test_nfa_b2 test_nfa_b3
+
+
+test_nfa_az = NFA { NFA.name   = "a-z"
+                  , NFA.states = Set.fromList ["az1", "az2"]
+                  , NFA.alph   = Set.fromList ['a'..'z']
+                  , NFA.rules  = Set.fromList [("az1", Set.fromList ['a'..'z'], "az2")]
+                  , NFA.start  = "az1"
+                  , NFA.finish = Set.fromList ["az2"]
+                  }
+
+test_nfa = NFA.concat test_nfa_az $ NFA.concat test_nfa_b1 $ NFA.iter test_nfa_b2

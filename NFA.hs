@@ -1,12 +1,15 @@
 module NFA
 ( NFA(..)
+, ast2nfa
 , concat
 , union
 , iter
 )where
 
 import Prelude hiding (concat)
-import qualified Data.Set as Set
+
+import qualified Data.Set  as Set
+import qualified Data.List as List
 
 type State      = String
 type Transition = Set.Set Char
@@ -19,6 +22,8 @@ data NFA = NFA { name   :: String
                , start  :: State
                , finish :: Set.Set State
                } deriving (Show)
+
+data AST = Leaf (Set.Set Char) | Branch AST Char AST               
 
 isDisjoint :: Ord a => Set.Set a -> Set.Set a -> Bool
 isDisjoint s1 s2 = Set.null $ Set.intersection s1 s2
@@ -71,18 +76,19 @@ iter m = NFA { name   = newName
           bypass    = Set.singleton (newStart, Set.empty, newFinish)
           loop      = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Set.empty], q <- [start m]]
 
-test_nfa_a = NFA { name   = "a"
-                 , states = Set.fromList ["a1", "a2"]
-                 , alph   = Set.singleton 'a'
-                 , rules  = Set.fromList [("a1", Set.singleton 'a', "a2")]
-                 , start  = "a1"
-                 , finish = Set.fromList ["a2"]
-                 }
+ast2nfa :: AST -> NFA
+ast2nfa (Branch left op right)
+    | op == '.' = concat (ast2nfa left) (ast2nfa right)
+    | op == '+' = union (ast2nfa left) (ast2nfa right)
+    | op == '*' = iter (ast2nfa left)
 
-test_nfa_b = NFA { name   = "b"
-                 , states = Set.fromList ["b1", "b2"]
-                 , alph   = Set.singleton 'b'
-                 , rules  = Set.fromList [("b1", Set.singleton 'b', "b2")]
-                 , start  = "b1"
-                 , finish = Set.fromList ["b2"]
-                 }
+ast2nfa (Leaf x) = NFA { name   = Set.toList x
+                       , states = Set.union (Set.singleton newFinish) (Set.singleton newStart)
+                       , alph   = x
+                       , rules  = Set.singleton (newStart, x, newFinish)
+                       , start  = newStart
+                       , finish = Set.singleton newFinish
+                       }
+
+    where newStart  = "S_{" ++ (List.intersperse ',' $ Set.toList x) ++ "}"
+          newFinish = "F_{" ++ (List.intersperse ',' $ Set.toList x) ++ "}"
