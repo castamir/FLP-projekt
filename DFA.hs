@@ -1,6 +1,5 @@
 module DFA
 ( DFA(..)
-, test_nfa
 , nfa2dfa
 )where
 
@@ -95,57 +94,3 @@ nfa2dfa' nfa = DFA { DFA.name   = NFA.name nfa
           newRules  = genRules nfa newStates
           newFinish = Set.filter (notDisjoint $ NFA.finish nfa) newStates
 
-test_rel = Set.fromList [(1,2),(2,3),(3,4)]
-
-test_nfa_a1 = NFA { NFA.name   = "a"
-                  , NFA.states = Set.fromList ["a11", "a12"]
-                  , NFA.alph   = Set.singleton 'a'
-                  , NFA.rules  = Set.fromList [("a11", Set.singleton 'a', "a12")]
-                  , NFA.start  = "a11"
-                  , NFA.finish = Set.fromList ["a12"]
-                  }
-
-test_nfa_a2 = NFA { NFA.name   = "a"
-                  , NFA.states = Set.fromList ["a21", "a22"]
-                  , NFA.alph   = Set.singleton 'a'
-                  , NFA.rules  = Set.fromList [("a21", Set.singleton 'a', "a22")]
-                  , NFA.start  = "a21"
-                  , NFA.finish = Set.fromList ["a22"]
-                  }                  
-
-test_nfa_b1 = NFA { NFA.name   = "b"
-                  , NFA.states = Set.fromList ["b11", "b12"]
-                  , NFA.alph   = Set.singleton 'b'
-                  , NFA.rules  = Set.fromList [("b11", Set.singleton 'b', "b12")]
-                  , NFA.start  = "b11"
-                  , NFA.finish = Set.fromList ["b12"]
-                  }
-
-test_nfa_b2 = NFA { NFA.name   = "b"
-                  , NFA.states = Set.fromList ["b21", "b22"]
-                  , NFA.alph   = Set.singleton 'b'
-                  , NFA.rules  = Set.fromList [("b21", Set.singleton 'b', "b22")]
-                  , NFA.start  = "b21"
-                  , NFA.finish = Set.fromList ["b22"]
-                  }
-
-test_nfa_b3 = NFA { NFA.name   = "b"
-                  , NFA.states = Set.fromList ["b31", "b32"]
-                  , NFA.alph   = Set.singleton 'b'
-                  , NFA.rules  = Set.fromList [("b31", Set.singleton 'b', "b32")]
-                  , NFA.start  = "b31"
-                  , NFA.finish = Set.fromList ["b32"]
-                  }
-
---test_nfa = NFA.concat (NFA.iter $ NFA.union test_nfa_a1 test_nfa_b1) $ NFA.concat test_nfa_a2 $ NFA.concat test_nfa_b2 test_nfa_b3
-
-
-test_nfa_az = NFA { NFA.name   = "a-z"
-                  , NFA.states = Set.fromList ["az1", "az2"]
-                  , NFA.alph   = Set.fromList ['a'..'z']
-                  , NFA.rules  = Set.fromList [("az1", Set.fromList ['a'..'z'], "az2")]
-                  , NFA.start  = "az1"
-                  , NFA.finish = Set.fromList ["az2"]
-                  }
-
-test_nfa = NFA.concat test_nfa_az $ NFA.concat test_nfa_b1 $ NFA.iter test_nfa_b2
