@@ -25,7 +25,7 @@ expandList str = f [] str
 allowedSymbolSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "
 
 getSet [] = Set.empty
-getSet ('^':xs) = Set.difference (Set.fromList allowedSymbolSet) (Set.fromList (expandList (x:xs)))                 
+getSet ('^':xs) = Set.difference (Set.fromList allowedSymbolSet) (Set.fromList (expandList xs))                 
 getSet (x:xs) = Set.fromList (expandList (x:xs))
   
 getBracketBlockPrefix (x:xs) = f [] xs 1
