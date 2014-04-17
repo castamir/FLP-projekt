@@ -68,17 +68,21 @@ iter m = NFA { name   = newName
 
 ast2nfa :: (BTree, Int) -> (NFA, Int)
 ast2nfa ((Branch left op right), n)
-    | op == '.' = (concat (fst (ast2nfa (left, n))) (fst (ast2nfa (right, n))), n)
-    | op == '+' = (union (fst (ast2nfa (left, n))) (fst (ast2nfa (right, n))), n)
-    | op == '*' = (iter (fst (ast2nfa (left, n))), n)
+    | op == '.' = (concat (fst leftTree) (fst rightTree), snd rightTree)
+    | op == '+' = (union (fst leftTree) (fst rightTree), snd rightTree)
+    | op == '*' = (iter $ fst leftTree, snd leftTree)
+
+    where
+      leftTree  = ast2nfa (left,n) 
+      rightTree = ast2nfa (right, snd leftTree)
 
 ast2nfa ((Leaf x), n) = (NFA { name   = Set.toList x
-                         , states = Set.union (Set.singleton newFinish) (Set.singleton newStart)
-                         , alph   = x
-                         , rules  = Set.singleton (newStart, x, newFinish)
-                         , start  = newStart
-                         , finish = Set.singleton newFinish
-                         }, n + 2)
+                             , states = Set.union (Set.singleton newFinish) (Set.singleton newStart)
+                             , alph   = x
+                             , rules  = Set.singleton (newStart, x, newFinish)
+                             , start  = newStart
+                             , finish = Set.singleton newFinish
+                             }, n + 2)
 
     where newStart  = show n
           newFinish = show (n + 1)
