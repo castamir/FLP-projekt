@@ -173,10 +173,7 @@ main = do
     argv <- getArgs
     (opt, nonOpt) <- getParams argv
     -- parse regexp -> create tree -> create NFA -> transform to DFA
-    let mfa = DFA.nfa2dfa $NFA.ast2nfa $ Parser.regexpToBTree $ head nonOpt
-    -- call praser
-    -- FSM ... MFA
-    -- check if option "-p" be setted
+    let mfa = DFA.nfa2dfa $ fst $ NFA.ast2nfa ((Parser.regexpToBTree $ head nonOpt), 0)
     if elem PrintMFA opt
       then printMFA mfa
       else do
@@ -188,4 +185,3 @@ main = do
           else -- input data from stdin
             executeSimpleGrep mfa stdin
     return 0
-
