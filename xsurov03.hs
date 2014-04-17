@@ -95,14 +95,14 @@ rangeStr' :: [String] -> String -> String -> [String]
 rangeStr' xs [] [] = xs
 rangeStr' xs ys [] --no more chars
   | length ys > 3 = xs ++ [head ys:'-':last ys:[]]
-  | otherwise     = xs ++ [ys]
+  | otherwise     = xs ++ [List.intersperse ',' ys]
 
 rangeStr' xs ys (c:cs) =
   if succ (last ys) == c
     then rangeStr' xs (ys ++ [c]) cs -- add char into tmp string
     else if length ys > 2 -- c is not next successor of order - string completed
       then rangeStr' (xs ++ [head ys:'-':last ys:[]]) [c] cs
-      else rangeStr' (xs ++ [ys]) [c] cs
+      else rangeStr' (xs ++ [List.intersperse ',' ys]) [c] cs
 
 ------------------------------------------------------------------------------
 -- add spaces after string to specified length
@@ -131,7 +131,7 @@ printMFA mfa = do
   putStr "States:        "
   putStrLn $ states2string istates
   putStr "Alphabet:      "
-  putStrLn $ names2string $ List.intersperse "," $ rangeStr $ Set.toList $ DFA.alph mfa
+  putStrLn $ names2string $ rangeStr $ Set.toList $ DFA.alph mfa
   putStr "Start state:   "
   putStrLn $ head $ findNames [DFA.start mfa] istates
   putStr "Final states:  "
@@ -155,18 +155,19 @@ matchLine cs mfa
 
 ------------------------------------------------------------------------------
 -- own process of our simple grep
-executeSimpleGrep :: DFA -> Handle -> IO ()
-executeSimpleGrep mfa handle = do
+executeSimpleGrep :: DFA -> Handle -> Bool -> IO ()
+executeSimpleGrep mfa handle _bool = do
   -- get line and match regexp by MFA
   ieof <- hIsEOF handle
   if ieof
     then return ()
     else do
       line <- hGetLine handle
-      if matchLine line mfa == False
+      -- _bool = False if is used "-v" parameter, else True
+      if matchLine line mfa == _bool
         then return ()
         else putStrLn line
-      executeSimpleGrep mfa handle
+      executeSimpleGrep mfa handle _bool
 ------------------------------------------------------------------------------
 main = do
     -- get parameters
@@ -180,8 +181,10 @@ main = do
         if length nonOpt == 2
           then do -- input data from file
             handle <- openFile (last nonOpt) ReadMode
-            executeSimpleGrep mfa handle 
+            -- when "-v" is used, length opt == 1 - so genereate False
+            -- for negated output
+            executeSimpleGrep mfa handle $ length opt == 0
             hClose handle
           else -- input data from stdin
-            executeSimpleGrep mfa stdin
+            executeSimpleGrep mfa stdin $ length opt == 0
     return 0
