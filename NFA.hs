@@ -1,9 +1,6 @@
 module NFA
 ( NFA(..)
 , ast2nfa
-, concat
-, union
-, iter
 )where
 
 import Prelude hiding (concat)

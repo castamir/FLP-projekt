@@ -3,6 +3,9 @@ import System.Environment
 import System.Console.GetOpt
 import qualified Data.Set as Set
 import qualified Data.List as List
+
+import Parser
+import NFA
 import DFA 
 import Interpreter (mfaInterpret,findTrap)
 ------------------------------------------------------------------------------
@@ -13,16 +16,6 @@ type State      = String
 type SuperState = Set.Set State
 type Transition = Set.Set Char
 type Rule       = (SuperState, Transition, SuperState)
-
-test_dfa = nfa2dfa test_nfa
-
-test_dfa1 = DFA { DFA.name   = "borek"
-               , DFA.states = Set.map Set.fromList $ Set.fromList [["a","b"],["a","c"], ["b", "c"], ["d"], ["f"]]
-               , DFA.alph   = Set.fromList ['a','b','c','d']
-               , DFA.rules  = Set.fromList [(Set.fromList ["a","b"], Set.fromList ['b','c','d','e','6'], Set.fromList ["f"])]
-               , DFA.start  = Set.fromList ["a", "b"]
-               , DFA.finish = Set.map Set.fromList $ Set.fromList [["b","c"],["f"]]
-               }
 
 ------------------------------------------------------------------------------
 options :: [OptDescr Flag]
@@ -47,13 +40,14 @@ getParams argv =
         inputInfo = "  INPUT\tfile with input data\n"
         emsg1 = "ZRV is missing!\n"
         emsg2 = "Too many arguments!\n"
-------------------------------------------------------------------------------
+
 ------------------------------------------------------------------------------
 renameMFA_states :: Set.Set SuperState -> SuperState -> [(SuperState, String)]
 renameMFA_states states trap = map (renameMFA_states' trap) $ zip (Set.toList states) [0..]
 renameMFA_states' trap (x,y)
   | x == trap = (x, "trap")
   | otherwise = (x, "q" ++ show y)
+
 ------------------------------------------------------------------------------
 findNames :: [SuperState] -> [(SuperState, String)] -> [String]
 findNames xs ixs = List.sort [y | z <- xs, (x,y) <- ixs, z == x]
@@ -149,19 +143,20 @@ main = do
     -- get parameters
     argv <- getArgs
     (opt, nonOpt) <- getParams argv
+    let mfa = DFA.nfa2dfa $NFA.ast2nfa $ Parser.regexpToBTree $ head nonOpt
     -- call praser
     -- FSM ... MFA
     -- check if option "-p" be setted
     if elem PrintMFA opt
-      then printMFA test_dfa
+      then printMFA mfa
       else do
         if length nonOpt == 2
           then do -- input data from file
             handle <- openFile (last nonOpt) ReadMode
-            executeSimpleGrep test_dfa handle 
+            executeSimpleGrep mfa handle 
             hClose handle
           else -- input data from stdin
-            executeSimpleGrep test_dfa stdin
+            executeSimpleGrep mfa stdin
 
     return 0
 
