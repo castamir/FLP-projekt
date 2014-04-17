@@ -23,6 +23,7 @@ expandList str = f [] str
 
 
 allowedSymbolSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "
+insideSetSymbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 -"
 
 getSet [] = Set.empty
 getSet ('^':xs) = Set.difference (Set.fromList allowedSymbolSet) (Set.fromList (expandList xs))                 
@@ -64,14 +65,15 @@ concatTree (x:'?':xs)
   | otherwise = Branch (Branch (Leaf (Set.singleton x)) '+' (Leaf Set.empty)) '.' (concatTree xs)
 concatTree (x:xs)
   | x == '.'  = Branch (Leaf (Set.fromList allowedSymbolSet)) '.' (concatTree xs)
-  | x == '['  = f (takeWhile (']'/=) xs) (dropWhile (']'/=) xs)   
+  | x == '['  = f (takeWhile (`elem` insideSetSymbols) xs) (dropWhile (`elem` insideSetSymbols) xs)   
   | otherwise = Branch (Leaf (Set.singleton x)) '.' (concatTree xs)
     where
       f p (']':'*':xs)  = Branch (Branch (Leaf (getSet p)) '*' (Leaf Set.empty)) '.' (concatTree xs)
       f p (']':'+':xs)  = Branch (Branch (Leaf (getSet p)) '.' (Branch (Leaf (getSet p)) '*' (Leaf Set.empty))) '.' (concatTree xs)
       f p (']':'?':xs)  = Branch (Branch (Leaf (getSet p)) '+' (Leaf Set.empty)) '.' (concatTree xs)
       f p (']':xs)      = Branch (Leaf (getSet p)) '.' (concatTree xs)
-      f _ _             = error "REGEXP.parse: missing ']'."  
+      f _ []            = error "REGEXP.parse: missing ']'."  
+      f _ (x:xs)        = error ("REGEXP.parse: unexpected symbol " ++ [x] ++ ".")  
 
 bracketTree [] = Leaf Set.empty
 bracketTree s@('(':xs) = f (getBracketBlockPrefix s) (getBracketBlockSuffix s)
