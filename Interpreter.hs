@@ -45,7 +45,7 @@ mfaInterpret [] state mfa = Set.member state $ DFA.finish mfa
 mfaInterpret (c:cs) state mfa
   | Set.member state fins == True  = True
   | state == trap                  = False
-  | Set.member c alph == False = mfaInterpret cs state mfa
+  | Set.member c alph == False = False
   | otherwise = mfaInterpret cs nextState mfa
   where
     fins = DFA.finish mfa

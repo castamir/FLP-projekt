@@ -164,9 +164,9 @@ executeSimpleGrep mfa handle _bool = do
     else do
       line <- hGetLine handle
       -- _bool = False if is used "-v" parameter, else True
-      if matchLine line mfa == _bool
-        then return ()
-        else putStrLn line
+      if (matchLine line mfa) == _bool
+        then putStrLn line
+        else return ()
       executeSimpleGrep mfa handle _bool
 ------------------------------------------------------------------------------
 main = do
