@@ -18,15 +18,12 @@ expandList str = f [] str
     f p (x:xs) = x : (f p xs)
 
 
-getSet [] = Set.empty
-getSet (x:xs) =
-  if x == '^'
-    then Set.difference (Set.fromList allowedSymbolSet) (Set.fromList (expandList (x:xs)))                 
-    else Set.fromList (expandList (x:xs))
-
 allowedSymbolSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "
 
-
+getSet [] = Set.empty
+getSet (x:xs) =
+getSet ('^':xs) = Set.difference (Set.fromList allowedSymbolSet) (Set.fromList (expandList (x:xs)))                 
+getSet (x:xs) = Set.fromList (expandList (x:xs))
   
 getBracketBlockPrefix (x:xs) = f [] xs 1
   where
