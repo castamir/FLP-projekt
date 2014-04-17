@@ -62,18 +62,21 @@ concatTree (x:'+':xs)
   | otherwise = Branch (Branch (Leaf (Set.singleton x)) '.' (Branch (Leaf (Set.singleton x)) '*' (Leaf Set.empty))) '.' (concatTree xs)
 concatTree (x:'?':xs)
   | x == '.'  = Branch (Branch (Leaf (Set.fromList allowedSymbolSet)) '+' (Leaf Set.empty)) '.' (concatTree xs)
-  | otherwise = Branch (Branch (Leaf (Set.singleton x)) '+' (Leaf Set.empty)) '.' (concatTree xs)
-concatTree (x:xs)
-  | x == '.'  = Branch (Leaf (Set.fromList allowedSymbolSet)) '.' (concatTree xs)
-  | x == '['  = f (takeWhile (`elem` insideSetSymbols) xs) (dropWhile (`elem` insideSetSymbols) xs)   
-  | otherwise = Branch (Leaf (Set.singleton x)) '.' (concatTree xs)
-    where
-      f p (']':'*':xs)  = Branch (Branch (Leaf (getSet p)) '*' (Leaf Set.empty)) '.' (concatTree xs)
-      f p (']':'+':xs)  = Branch (Branch (Leaf (getSet p)) '.' (Branch (Leaf (getSet p)) '*' (Leaf Set.empty))) '.' (concatTree xs)
-      f p (']':'?':xs)  = Branch (Branch (Leaf (getSet p)) '+' (Leaf Set.empty)) '.' (concatTree xs)
-      f p (']':xs)      = Branch (Leaf (getSet p)) '.' (concatTree xs)
-      f _ []            = error "REGEXP.parse: missing ']'."  
-      f _ (x:xs)        = error ("REGEXP.parse: unexpected symbol " ++ [x] ++ ".")  
+  | otherwise = Branch (Branch (Leaf (Set.singleton x)) '+' (Leaf Set.empty)) '.' (concatTree xs) 
+concatTree ('.':xs) = Branch (Leaf (Set.fromList allowedSymbolSet)) '.' (concatTree xs)
+concatTree ('[':y:xs) =
+  if y == '^'
+    then f ("^" ++ (takeWhile (`elem` insideSetSymbols) xs)) (dropWhile (`elem` insideSetSymbols) xs)
+    else f (takeWhile (`elem` insideSetSymbols) (y:xs)) (dropWhile (`elem` insideSetSymbols) (y:xs)) 
+      where
+        f p (']':'*':xs)  = Branch (Branch (Leaf (getSet p)) '*' (Leaf Set.empty)) '.' (concatTree xs)
+        f p (']':'+':xs)  = Branch (Branch (Leaf (getSet p)) '.' (Branch (Leaf (getSet p)) '*' (Leaf Set.empty))) '.' (concatTree xs)
+        f p (']':'?':xs)  = Branch (Branch (Leaf (getSet p)) '+' (Leaf Set.empty)) '.' (concatTree xs)
+        f p (']':xs)      = Branch (Leaf (getSet p)) '.' (concatTree xs)
+        f _ []            = error "REGEXP.parse: missing ']'."  
+        f _ (x:xs)        = error ("REGEXP.parse: unexpected symbol '" ++ [x] ++ "'.")
+concatTree ('[':xs) = error "REGEXP.parse: missing ']'."
+concatTree (x:xs) = Branch (Leaf (Set.singleton x)) '.' (concatTree xs) 
 
 bracketTree [] = Leaf Set.empty
 bracketTree s@('(':xs) = f (getBracketBlockPrefix s) (getBracketBlockSuffix s)
