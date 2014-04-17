@@ -1,3 +1,7 @@
+module Parser
+( BTree(..)
+, regexpToBTree
+)where
 
 import qualified Data.Set as Set
 
@@ -95,4 +99,3 @@ unionTree s@(x:xs) = f (getUnionBlockPrefix s) (getUnionBlockSuffix s)
 
 
 regexpToBTree xs = unionTree xs
-
