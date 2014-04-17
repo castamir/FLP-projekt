@@ -22,33 +22,29 @@ data NFA = NFA { name   :: String
                , finish :: Set.Set State
                } deriving (Show)              
 
-isDisjoint :: Ord a => Set.Set a -> Set.Set a -> Bool
-isDisjoint s1 s2 = Set.null $ Set.intersection s1 s2
+renameStates :: Set.Set State -> Set.Set State
+renameStates s = Set.map (++ "'") s
 
 concat :: NFA -> NFA -> NFA
-concat m1 m2 = if isDisjoint (states m1) (states m2)
-                    then NFA { name   = newName
-                             , states = Set.union (states m1) (states m2)
-                             , alph   = Set.union (alph m1) (alph m2)
-                             , rules  = Set.union bridge $ Set.union (rules m1) (rules m2)
-                             , start  = start m1
-                             , finish = finish m2 
-                             }
-                    else error "NFA.concat: State sets are not disjoint."
+concat m1 m2 = NFA { name   = newName
+                   , states = Set.union (renameStates $ states m1) (states m2)
+                   , alph   = Set.union (alph m1) (alph m2)
+                   , rules  = Set.union bridge $ Set.union (rules m1) (rules m2)
+                   , start  = start m1
+                   , finish = finish m2 
+                   }
 
     where newName = name m1 ++ name m2
           bridge  = Set.fromList [(p,a,q) | p <- Set.toList (finish m1), a <- [Set.empty], q <- [start m2]]
 
 union :: NFA -> NFA -> NFA
-union m1 m2 = if isDisjoint (states m1) (states m2)
-                    then NFA { name   = newName
-                             , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) $ Set.union (states m1) (states m2)
-                             , alph   = Set.union (alph m1) (alph m2)
-                             , rules  = Set.union fork $ Set.union join $ Set.union (rules m1) (rules m2)
-                             , start  = newStart
-                             , finish = Set.singleton newFinish 
-                             }
-                    else error "NFA.union: State sets are not disjoint."
+union m1 m2 = NFA { name   = newName
+                  , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) $ Set.union (renameStates $ states m1) (states m2)
+                  , alph   = Set.union (alph m1) (alph m2)
+                  , rules  = Set.union fork $ Set.union join $ Set.union (rules m1) (rules m2)
+                  , start  = newStart
+                  , finish = Set.singleton newFinish 
+                  }
 
     where newName   = name m1 ++ "+" ++ name m2
           newStart  = "S_" ++ newName
