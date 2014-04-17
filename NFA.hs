@@ -11,6 +11,8 @@ import Prelude hiding (concat)
 import qualified Data.Set  as Set
 import qualified Data.List as List
 
+import Parser
+
 type State      = String
 type Transition = Set.Set Char
 type Rule       = (State, Transition, State)
@@ -21,9 +23,7 @@ data NFA = NFA { name   :: String
                , rules  :: Set.Set Rule
                , start  :: State
                , finish :: Set.Set State
-               } deriving (Show)
-
-data AST = Leaf (Set.Set Char) | Branch AST Char AST               
+               } deriving (Show)              
 
 isDisjoint :: Ord a => Set.Set a -> Set.Set a -> Bool
 isDisjoint s1 s2 = Set.null $ Set.intersection s1 s2
@@ -76,10 +76,10 @@ iter m = NFA { name   = newName
           bypass    = Set.singleton (newStart, Set.empty, newFinish)
           loop      = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Set.empty], q <- [start m]]
 
-ast2nfa :: AST -> NFA
+ast2nfa :: BTree -> NFA
 ast2nfa (Branch left op right)
     | op == '.' = concat (ast2nfa left) (ast2nfa right)
-    | op == '+' = union (ast2nfa left) (ast2nfa right)
+    | op == '|' = union (ast2nfa left) (ast2nfa right)
     | op == '*' = iter (ast2nfa left)
 
 ast2nfa (Leaf x) = NFA { name   = Set.toList x
