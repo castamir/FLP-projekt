@@ -1,3 +1,12 @@
+------------------------------------------------------
+---- Project: Simple Grep
+---- Authors:
+----   xsurov03 - Marek Surovic
+----   xstodu05 - Petr Stodulka
+----   xpavlu06 - Igor Pavlu
+----   xpauli00 - Miroslav Paulik
+--------------------------------------------------------
+
 module Interpreter
 ( mfaInterpret
 , findTrap
@@ -11,8 +20,8 @@ type SuperState = Set.Set State
 type Transition = Set.Set Char
 type Rule       = (SuperState, Transition, SuperState)
 
-
 ------------------------------------------------------------------------------
+-- find trap - if exists return it else return unique state "_"
 findTrap :: [Rule] -> Set.Set SuperState -> Set.Set Char -> SuperState
 findTrap [] _ _ = Set.singleton ['_'] -- trap doesn't exists, so return special Superstate
 findTrap ((p, r, q):rs) fs cs
@@ -20,6 +29,7 @@ findTrap ((p, r, q):rs) fs cs
   | otherwise  = findTrap rs fs cs
 
 -----------------------------------------------------------------------------
+-- find rule for state and symbol and return next state
 findNextState :: SuperState->  Char -> [Rule] -> SuperState
 findNextState state symbol [] = error "findNextState: not found next state"
 findNextState state symbol ((p, a, q):rs)
@@ -27,6 +37,9 @@ findNextState state symbol ((p, a, q):rs)
   | otherwise = findNextState state symbol rs
 
 ------------------------------------------------------------------------------
+-- interpret of DFA (or MFA)
+-- return True if reach final state or False if don't reach final state or
+-- reach "trap" state
 mfaInterpret :: String -> SuperState -> DFA -> Bool
 mfaInterpret [] state mfa = Set.member state $ DFA.finish mfa
 mfaInterpret (c:cs) state mfa
