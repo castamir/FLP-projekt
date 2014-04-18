@@ -26,5 +26,13 @@ classId classes s = fst $ head $ filter (\x -> elem s $ snd x) $ map (\(i,x) -> 
     where
       srcStates rls = map (\(p,_,_) -> p) rls
 
-splitClass :: (Int, [SimpleRule]) -> [[SimpleRule]]
-splitClass cls = 
+splitClass :: [(Int, [SimpleRule])] -> (Int, [SimpleRule]) -> [Char] -> [(Int, [SimpleRule])]
+splitClass classes cls []     = classes
+splitClass classes cls (x:xs) = if classes /= newClasses
+                                  then newClasses
+                                  else splitClass classes cls xs
+    where
+      newClasses = splitClassStep classes cls x
+
+splitClassStep :: [(Int, [SimpleRule])] -> (Int, [SimpleRule]) -> Char -> [(Int, [SimpleRule])]
+simpleRulesStep classes cls sym = 
