@@ -1,3 +1,12 @@
+------------------------------------------------------
+-- Project: Simple Grep
+-- Authors:
+--   xsurov03 - Marek Surovic
+--   xstodu05 - Petr Stodulka
+--   xpavlu06 - Igor Pavlu
+--   xpauli00 - Miroslav Paulik
+------------------------------------------------------
+
 module Parser
 ( BTree(..)
 , regexpToBTree
@@ -10,25 +19,29 @@ type Symbol = Set.Set Char
 data BTree = Leaf Symbol | Branch BTree Char BTree 
   deriving (Eq,Show)
 
+------------------------------------------------------
 expandRange from to =
   if from < to
     then [from .. to]
     else [to .. from]
 
+------------------------------------------------------
 expandList str = f [] str
   where
     f p [] = p
     f p (x:'-':z:xs) =(expandRange x z) ++ (f p xs)
     f p (x:xs) = x : (f p xs)
 
-
+------------------------------------------------------
 allowedSymbolSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "
 insideSetSymbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 -"
 
+------------------------------------------------------
 getSet [] = Set.empty
 getSet ('^':xs) = Set.difference (Set.fromList allowedSymbolSet) (Set.fromList (expandList xs))                 
 getSet (x:xs) = Set.fromList (expandList (x:xs))
-  
+
+------------------------------------------------------  
 getBracketBlockPrefix (x:xs) = f [] xs 1
   where
     f p [] d  | d == 1 = p
@@ -40,6 +53,7 @@ getBracketBlockPrefix (x:xs) = f [] xs 1
 
 getBracketBlockSuffix (x:xs) = drop (2 + length (getBracketBlockPrefix (x:xs))) (x:xs)
 
+------------------------------------------------------
 getUnionBlockPrefix (x:xs) = f [] (x:xs) 0
   where
     f p [] d  | d == 0 = p
@@ -52,17 +66,18 @@ getUnionBlockPrefix (x:xs) = f [] (x:xs) 0
 
 getUnionBlockSuffix (x:xs) = drop (length (getUnionBlockPrefix (x:xs))) (x:xs)
 
+------------------------------------------------------
 concatTree []       = Leaf Set.empty
 concatTree (']':xs) = error "REGEXP.parse: unexpected ']'."
 concatTree (x:'*':xs)
   | x == '.'  = Branch (Branch (Leaf (Set.fromList allowedSymbolSet)) '*' (Leaf Set.empty)) '.' (concatTree xs)
-  | otherwise = Branch (Branch (Leaf (Set.singleton x)) '*' (Leaf Set.empty)) '.' (concatTree xs)
+  | x `elem` allowedSymbolSet = Branch (Branch (Leaf (Set.singleton x)) '*' (Leaf Set.empty)) '.' (concatTree xs)
 concatTree (x:'+':xs)
   | x == '.'  = Branch (Branch (Leaf (Set.fromList allowedSymbolSet)) '.' (Branch (Leaf (Set.fromList allowedSymbolSet)) '*' (Leaf Set.empty))) '.' (concatTree xs)
-  | otherwise = Branch (Branch (Leaf (Set.singleton x)) '.' (Branch (Leaf (Set.singleton x)) '*' (Leaf Set.empty))) '.' (concatTree xs)
+  | x `elem` allowedSymbolSet = Branch (Branch (Leaf (Set.singleton x)) '.' (Branch (Leaf (Set.singleton x)) '*' (Leaf Set.empty))) '.' (concatTree xs)
 concatTree (x:'?':xs)
   | x == '.'  = Branch (Branch (Leaf (Set.fromList allowedSymbolSet)) '+' (Leaf Set.empty)) '.' (concatTree xs)
-  | otherwise = Branch (Branch (Leaf (Set.singleton x)) '+' (Leaf Set.empty)) '.' (concatTree xs) 
+  | x `elem` allowedSymbolSet = Branch (Branch (Leaf (Set.singleton x)) '+' (Leaf Set.empty)) '.' (concatTree xs) 
 concatTree ('.':xs) = Branch (Leaf (Set.fromList allowedSymbolSet)) '.' (concatTree xs)
 concatTree ('[':y:xs) =
   if y == '^'
@@ -76,8 +91,11 @@ concatTree ('[':y:xs) =
         f _ []            = error "REGEXP.parse: missing ']'."  
         f _ (x:xs)        = error ("REGEXP.parse: unexpected symbol '" ++ [x] ++ "'.")
 concatTree ('[':xs) = error "REGEXP.parse: missing ']'."
-concatTree (x:xs) = Branch (Leaf (Set.singleton x)) '.' (concatTree xs) 
+concatTree (x:xs)
+  | x `elem` allowedSymbolSet	= Branch (Leaf (Set.singleton x)) '.' (concatTree xs)
+  | otherwise 					= error ("REGEXP.parse: unexpected symbol '" ++ [x] ++ "'.")
 
+------------------------------------------------------
 bracketTree [] = Leaf Set.empty
 bracketTree s@('(':xs) = f (getBracketBlockPrefix s) (getBracketBlockSuffix s)
   where
@@ -92,11 +110,12 @@ bracketTree (x:xs) = f (takeWhile ('('/=) (x:xs)) (x:xs)
         then concatTree p
         else Branch (concatTree p) '.' (bracketTree (drop (length p) o))
 
+------------------------------------------------------
 unionTree [] = Leaf Set.empty
 unionTree s@(x:xs) = f (getUnionBlockPrefix s) (getUnionBlockSuffix s)
   where
     f p ('|':xs)  = Branch (bracketTree p) '+' (unionTree xs)
     f p _         = (bracketTree p)
 
-
+------------------------------------------------------
 regexpToBTree xs = unionTree xs
