@@ -15,7 +15,8 @@ import qualified Data.List as List
 
 import Parser
 import NFA
-import DFA 
+import DFA
+import MIN 
 import Interpreter (mfaInterpret,findTrap)
 ------------------------------------------------------------------------------
 data Flag = Invert | PrintMFA
@@ -174,7 +175,7 @@ main = do
     argv <- getArgs
     (opt, nonOpt) <- getParams argv
     -- parse regexp -> create tree -> create NFA -> transform to DFA
-    let mfa = DFA.nfa2dfa $ fst $ NFA.ast2nfa ((Parser.regexpToBTree $ head nonOpt), 0)
+    let mfa = MIN.dfa2mfa $ DFA.nfa2dfa $ fst $ NFA.ast2nfa ((Parser.regexpToBTree $ head nonOpt), 0)
     if elem PrintMFA opt
       then printMFA mfa
       else do
