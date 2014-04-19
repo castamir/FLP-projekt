@@ -57,7 +57,7 @@ getBracketBlockSuffix (x:xs) = drop (2 + length (getBracketBlockPrefix (x:xs))) 
 getUnionBlockPrefix (x:xs) = f [] (x:xs) 0
   where
     f p [] d  | d == 0 = p
-              | otherwise = error "REGEXP.parse: missing '('."
+              | otherwise = error "REGEXP.parse: missing ')'."
     f p (x:xs) d  | x == '('            = x : (f p xs (d+1))
                   | x == ')' && d < 1   = error "REGEXP.parse: unexpected ')'."
                   | x == ')'            = x : (f p xs (d-1))
