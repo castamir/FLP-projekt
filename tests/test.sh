@@ -3,19 +3,18 @@
 
   
 function testRegexp {
-	echo "Testing '$1' and '$2' against /etc/passwd"
+	echo "Testing '$1' and '$2' against source.data"
 
 	rm -f *.output
 	
-    ../xsurov03 $1 /etc/passwd > given.output
-    grep $2 /etc/passwd > expected.output
+    ../xsurov03 $1 source.data > given.output
+    grep $2 source.data > expected.output
     
     DIFF=$(diff expected.output given.output) 
 	if [ "$DIFF" != "" ] 
 	then
 	    echo "FAILED"
-	    echo ""
-	    printf "%s" "$DIFF"
+	    printf "\n%s" "$DIFF"
 	else
 	    echo "SUCCESS"
 	fi
