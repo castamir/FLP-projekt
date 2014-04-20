@@ -28,23 +28,24 @@ OPTIONS
 
 PARSER
 ------
-	Module Parser creates abstract syntactic tree (AST) based on given regular 
-	expression. AST is designed as binary tree with operation in root node and
-	serves as input for creating automata and minimization.
+	Module Parser creates abstract syntactic tree (AST) based on a given regular 
+	expression. AST is designed as a binary tree with one operation in root node
+	and serves as an input for creating the minimal finite automata equivalent
+	to given regular expression.
 
 FINITE AUTOMATA
 ---------------
-	Finite automata or rather nondeterministic finite automata (NFA) is 
-	constructed	from AST which is output of parser.Module NFA contains	
-	all necessary methods for constructing NFA.
+	The finite automata or rather the nondeterministic finite automata (NFA) is 
+	constructed	from the AST which is output of Parser Module. Module NFA
+	contains all necessary methods for constructing NFA.
 
-	NFA module also contains methods for iteration of NFA, catenation and union 
-	of two NFA.
+	NFA module also contains methods for iteration of NFA, concatenation and
+	union of two NFA.
 
-	NFA is also input of DFA module. DFA module contains methods for 
+	NFA is also an input of DFA module. DFA module contains methods for 
 	determinisation. Output of DFA module is deterministic finite automata (DFA).
 
-	DFA modul contains methods for finding epsilon closure sets, making new 
+	DFA module contains methods for finding epsilon closure sets, making new 
 	transition function and new set of states.
 
 MINIMAL FINITE AUTOMATA
@@ -56,7 +57,8 @@ MINIMAL FINITE AUTOMATA
 	of MDFA. New set of rules for MDFA transition function is based on rules 
 	contained in DFA transition function and new states of MDFA. 
 
-MINIMAL AUTOMATA FORMAT
+MINIMAL FINITE AUTOMATA OUTPUT FORMAT
+-------------------------------------
 	Table representing transition function:
 
 	Source  | Dest | Symbols
