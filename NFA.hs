@@ -1,3 +1,12 @@
+------------------------------------------------------
+-- Project: Simple Grep
+-- Authors:
+--   xsurov03 - Marek Surovic
+--   xstodu05 - Petr Stodulka
+--   xpavlu06 - Igor Pavlu
+--   xpauli00 - Miroslav Paulik
+------------------------------------------------------
+
 module NFA
 ( NFA(..)
 , ast2nfa
@@ -20,8 +29,10 @@ data NFA = NFA { name   :: String
                , rules  :: Set.Set Rule
                , start  :: State
                , finish :: Set.Set State
-               } deriving (Show)              
+               } deriving (Show)  
 
+-------------------------------------------------------------------------------------
+-- catenation of 2 NFA returns NFA
 concat :: NFA -> NFA -> NFA
 concat m1 m2 = NFA { name   = newName
                    , states = Set.union (states m1) (states m2)
@@ -34,6 +45,8 @@ concat m1 m2 = NFA { name   = newName
     where newName = name m1 ++ name m2
           bridge  = Set.fromList [(p,a,q) | p <- Set.toList (finish m1), a <- [Set.empty], q <- [start m2]]
 
+-------------------------------------------------------------------------------------
+-- union of 2 NFA returns NFA
 union :: NFA -> NFA -> NFA
 union m1 m2 = NFA { name   = newName
                   , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) $ Set.union (states m1) (states m2)
@@ -49,6 +62,8 @@ union m1 m2 = NFA { name   = newName
           fork      = Set.fromList [(newStart, Set.empty, start m1), (newStart, Set.empty, start m2)]
           join      = Set.fromList [(p,a,q) | p <- Set.toList $ Set.union (finish m1) (finish m2), a <- [Set.empty], q <- [newFinish]]
 
+-------------------------------------------------------------------------------------
+-- iteration of NFA returns NFA
 iter :: NFA -> NFA
 iter m = NFA { name   = newName
              , states = Set.union (Set.singleton newStart) $ Set.union (Set.singleton newFinish) (states m)
@@ -66,6 +81,10 @@ iter m = NFA { name   = newName
           bypass    = Set.singleton (newStart, Set.empty, newFinish)
           loop      = Set.fromList [(p,a,q) | p <- Set.toList (finish m), a <- [Set.empty], q <- [start m]]
 
+-------------------------------------------------------------------------------------
+-- make NFA from AST (abstract syntactic tree) 
+-- n represents number of leaves
+-- this method provides pre-order walkthrough
 ast2nfa :: (BTree, Int) -> (NFA, Int)
 ast2nfa ((Branch left op right), n)
     | op == '.' = (concat (fst leftTree) (fst rightTree), snd rightTree)
