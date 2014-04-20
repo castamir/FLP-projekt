@@ -26,57 +26,17 @@ OPTIONS
 		Invert the sense of matching, to select non-matching lines.
 
 
-REGULAR EXPRESSIONS
--------------------
-	A regular expression is a pattern that describes a set of strings. Regular 
-	expressions are constructed analogously to arithmetic expressions, by using
-	various operators to combine smaller expressions.
-	
-	xsurov03 is similar to "extended" version of regular expression syntax.
-	Main difference between xsurov03 and GNU grep -e is in not supported '{' and
-	'}' parenthesis thats specify a number of repetitions.
-	
-	The fundamental building blocks are the regular expressions that match a 
-	single character. Most characters, including all letters and digits, are 
-	regular expressions that match themselves.
-	
-	A bracket expression is a list of characters enclosed by [ and ]. It matches
-	any single character in that list; if the first	 character of the list is
-	the caret ^ then it matches any character not in the list. For example, the
-	regular expression [0123456789] matches any single digit.
-	
-	Within a bracket expression, a range expression consists of two characters
-	separated by a hyphen. It matches any single character that sorts between
-	the two characters, inclusive, using the ASCII collating sequence and
-	character set. For example [a-d] is equivalent to [abcd].
-
-	The period . matches any single character.
-	
-	A regular expression may be followed by one of several repetition operators:
-	?	The preceding item is optional and matched at most once.
-	*	The preceding item will be matched zero or more times.
-	+	The preceding item will be matched one or more times.
-	
-	Two regular expressions may be concatenated; the resulting regular
-	expression matches any string formed by	concatenating two substrings that
-	respectively match the concatenated subexpressions.
-	
-	Two regular expressions may be joined by the infix operator |; the resulting
-	regular expression matches any string matching either subexpression.
-	
-	Repetition takes precedence over concatenation, which in turn takes
-	precedence over alternation. A whole subexpression may be enclosed in
-	parentheses to override these precedence rules.
-	
-	xsurov03 is restricted to filter input made from a limited set od symbols.
-	Each symbol of the given input MUST match the following PATTERN:
-	[a-zA-Z0-9 ].
+PARSER
+------
+	Module Parser creates abstract syntactic tree (AST) based on given regular 
+	expression. AST is designed as binary tree with operation in root node and
+	serves as input for creating automata and minimization.
 
 FINITE AUTOMATA
 ---------------
 	Finite automata or rather nondeterministic finite automata (NFA) is 
-	constructed	from abstract syntactic tree (AST) which is output of parser.
-	Module NFA contains	all necessary methods for constructing NFA.
+	constructed	from AST which is output of parser.Module NFA contains	
+	all necessary methods for constructing NFA.
 
 	NFA module also contains methods for iteration of NFA, catenation and union 
 	of two NFA.
@@ -92,10 +52,32 @@ MINIMAL FINITE AUTOMATA
 	Minimal deterministic finite automata (MDFA) is created by module MIN.
 	Input of MIN is DFA from module DFA. Output of module MIN is minimal DFA.
 
-	Minimalization is based on creating factor classes which represent new states 
+	Minimization is based on creating factor classes which represent new states 
 	of MDFA. New set of rules for MDFA transition function is based on rules 
 	contained in DFA transition function and new states of MDFA. 
 
+MINIMAL AUTOMATA FORMAT
+	Table representing transition function:
+
+	Source  | Dest | Symbols
+	------------------------
+		    |      |
+
+	Where Source is start state of rule, Dest is end state of rule, Symbols 
+	represent symbol in rule like this:
+
+		(Source, Symbol) -> Dest
+
+	If more symbols provides transition from Source state to Dest state, it 
+	can be wrote like this:
+
+		{a,b,c,e} or {a-c,e}
+
+
+EXTENSIONS
+----------
+	?	The preceding item is optional and matched at most once.
+	+	The preceding item will be matched one or more times.
 
 AUTHORS
 -------
