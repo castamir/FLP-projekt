@@ -1,3 +1,11 @@
+------------------------------------------------------
+-- Project: Simple Grep
+-- Authors:
+--   xsurov03 - Marek Surovic
+--   xstodu05 - Petr Stodulka
+--   xpavlu06 - Igor Pavlu
+--   xpauli00 - Miroslav Paulik
+------------------------------------------------------
 module DFA
 ( DFA(..)
 , nfa2dfa

@@ -74,10 +74,27 @@ REGULAR EXPRESSIONS
 
 FINITE AUTOMATA
 ---------------
+	Finite automata or rather nondeterministic finite automata (NFA) is 
+	constructed	from abstract syntactic tree (AST) which is output of parser.
+	Module NFA contains	all necessary methods for constructing NFA.
 
+	NFA module also contains methods for iteration of NFA, catenation and union 
+	of two NFA.
+
+	NFA is also input of DFA module. DFA module contains methods for 
+	determinisation. Output of DFA module is deterministic finite automata (DFA).
+
+	DFA modul contains methods for finding epsilon closure sets, making new 
+	transition function and new set of states.
 
 MINIMAL FINITE AUTOMATA
 -----------------------
+	Minimal deterministic finite automata (MDFA) is created by module MIN.
+	Input of MIN is DFA from module DFA. Output of module MIN is minimal DFA.
+
+	Minimalization is based on creating factor classes which represent new states 
+	of MDFA. New set of rules for MDFA transition function is based on rules 
+	contained in DFA transition function and new states of MDFA. 
 
 
 AUTHORS

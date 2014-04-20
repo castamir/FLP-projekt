@@ -1,3 +1,12 @@
+------------------------------------------------------
+-- Project: Simple Grep
+-- Authors:
+--   xsurov03 - Marek Surovic
+--   xstodu05 - Petr Stodulka
+--   xpavlu06 - Igor Pavlu
+--   xpauli00 - Miroslav Paulik
+------------------------------------------------------
+
 module MIN (dfa2mfa) where
 
 import qualified Data.Set as Set
