@@ -75,8 +75,9 @@ MINIMAL FINITE AUTOMATA OUTPUT FORMAT
 
 		{a,b,c,e} or {a-c,e}
 
-	There is also a special nonterminating state called "trap". Once automata
-	reach this state you will read all input symbols and deny whole input. 
+	There is also a special nonterminating state called "trap". Once the
+	automata reach this state it will read all the remaining input symbols and
+	then deny it. 
 
 EXTENSIONS
 ----------
