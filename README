@@ -65,15 +65,19 @@ MINIMAL FINITE AUTOMATA OUTPUT FORMAT
 	------------------------
 		    |      |
 
-	Where Source is start state of rule, Dest is end state of rule, Symbols 
-	represent symbol in rule like this:
+	Where Source is start state of a rule, Dest is end state of the rule,
+	Symbols represent symbols in the rule like this:
 
 		(Source, Symbol) -> Dest
 
-	If more symbols provides transition from Source state to Dest state, it 
-	can be wrote like this:
+	If more symbols provide transition from the same Source state to the same 
+	Dest state, it can be written the following way:
 
-		{a,b,c,e} or {a-c,e}
+		{a,b,c,e}
+	
+	or simply
+	
+		{a-c,e}
 
 	There is also a special nonterminating state called "trap". Once the
 	automata reach this state it will read all the remaining input symbols and
