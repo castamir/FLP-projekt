@@ -10,11 +10,13 @@ SYNOPSIS
 --------
 	./xsurov03 [options] PATTERN [FILE]
 
+
 DESCRIPTION
 -----------
 	xsurov03 is a simple grep searches the named input FILE (or standard input
 	if no file is given) for lines containing a match to the given PATTERN.
 	By default, Simple grep prints the matching lines.
+
 
 OPTIONS
 -------
@@ -33,6 +35,7 @@ PARSER
 	and serves as an input for creating the minimal finite automata equivalent
 	to given regular expression.
 
+
 FINITE AUTOMATA
 ---------------
 	The finite automata or rather the nondeterministic finite automata (NFA) is 
@@ -48,6 +51,7 @@ FINITE AUTOMATA
 	DFA module contains methods for finding epsilon closure sets, making new 
 	transition function and new set of states.
 
+
 MINIMAL FINITE AUTOMATA
 -----------------------
 	Minimal deterministic finite automata (MDFA) is created by module MIN.
@@ -56,6 +60,7 @@ MINIMAL FINITE AUTOMATA
 	Minimization is based on creating factor classes which represent new states 
 	of MDFA. New set of rules for MDFA transition function is based on rules 
 	contained in DFA transition function and new states of MDFA. 
+
 
 MINIMAL FINITE AUTOMATA OUTPUT FORMAT
 -------------------------------------
@@ -83,10 +88,12 @@ MINIMAL FINITE AUTOMATA OUTPUT FORMAT
 	automata reach this state it will read all the remaining input symbols and
 	then deny it. 
 
+
 EXTENSIONS
 ----------
 	?	The preceding item is optional and matched at most once.
 	+	The preceding item will be matched one or more times.
+
 
 AUTHORS
 -------
