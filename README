@@ -79,11 +79,13 @@ MINIMAL FINITE AUTOMATA OUTPUT FORMAT
 
 Interpret
 ---------
-    Na kazdemn radku ze vstupu je aplikovan MFA. V pripade, ze se podari dostat
-    do koncoveho stavu MFA je prohledavani ukonceno a potvrzena shoda s regexpem.
-    V opacnem pripade je odstranen prvni znak porovnavaneho retezce a porovnavani 
-    probiha znovu, dokud neni nalezena shoda nebo nebo zbyde po odseknuti prvniho
-    znaku prazdny retezec.
+    The Interpret module implements a basic MDFA interpreter that matches a line
+    from a given input against a given MDFA. A successful match is determined by
+    a series of transitions of the given MDFA that ends in a final state. Upon a
+    successful match the line on which the match was found is printed. In the
+    case of a unsuccessful match, the first character of the input string (a 
+    line in the first step) is ommitted and the matching is done again. If no
+    match is found on a line, the line is defaultly not printed.
 
 
 EXTENSIONS
