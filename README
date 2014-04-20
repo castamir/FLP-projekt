@@ -71,11 +71,20 @@ MINIMAL FINITE AUTOMATA OUTPUT FORMAT
 
     The set of symbols is specified as shown below.
 
-        {a,b,c,e} or {a-c,e}
+        {a,b,c,,d,e} or {a-d,e}
 
     A special non-terminating "trap" state is specified as well. This state
     serves as a sign that the pattern specified by the MDFA will not be matched,
     and thus the matching for a given can be terminated.
+
+Interpret
+---------
+    Na kazdemn radku ze vstupu je aplikovan MFA. V pripade, ze se podari dostat
+    do koncoveho stavu MFA je prohledavani ukonceno a potvrzena shoda s regexpem.
+    V opacnem pripade je odstranen prvni znak porovnavaneho retezce a porovnavani 
+    probiha znovu, dokud neni nalezena shoda nebo nebo zbyde po odseknuti prvniho
+    znaku prazdny retezec.
+
 
 EXTENSIONS
 ----------
