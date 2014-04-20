@@ -3,101 +3,99 @@ Simple Grep
 
 NAME
 ----
-	xsurov03 - print lines matching simplified pattern
+    xsurov03 - print lines matching simplified regular expression
 
 
 SYNOPSIS
 --------
-	./xsurov03 [options] PATTERN [FILE]
-
+    ./xsurov03 [options] PATTERN [FILE]
 
 DESCRIPTION
 -----------
-	xsurov03 is a simple grep searches the named input FILE (or standard input
-	if no file is given) for lines containing a match to the given PATTERN.
-	By default, Simple grep prints the matching lines.
-
+    xsurov03 is a simple grep that searches the named input FILE (or standard 
+    input if no file is given) for lines containing a match to the given PATTERN.
+    By default, Simple grep prints the matching lines.
 
 OPTIONS
 -------
-	-p
-		Ignore given input. Prints a minimal finite automata (MFA) coresponding
-		to the PATERN as a table of rules with MFA definition.
+    -p
+        Ignores given input. Prints a minimal finite automaton (MFA) corresponding
+        to PATTERN. The MFA is specified by its sets and a table of transition rules.
 
-	-v
-		Invert the sense of matching, to select non-matching lines.
+    -v
+        Prints lines that DO NOT match the the given PATTERN. 
 
 
 PARSER
 ------
-	Module Parser creates abstract syntactic tree (AST) based on a given regular 
-	expression. AST is designed as a binary tree with one operation in root node
-	and serves as an input for creating the minimal finite automata equivalent
-	to given regular expression.
+    The Parser module creates an abstract syntactic tree (AST) based on a given regular 
+    expression. The AST is designed as a binary expression tree with one operation
+    in the root node and serves as an input for creating the minimal finite automaton
+    equivalent to the given regular expression.
 
+NON-DETERMINISTIC FINITE AUTOMATA
+---------------------------------
+    The non-deterministic finite automaton (NFA) is constructed from the AST which is
+    the output of the Parser module. The NFA module contains all necessary functions
+    for constructing an NFA.
 
-FINITE AUTOMATA
----------------
-	The finite automata or rather the nondeterministic finite automata (NFA) is 
-	constructed	from the AST which is output of Parser Module. Module NFA
-	contains all necessary methods for constructing NFA.
-
-	NFA module also contains methods for iteration of NFA, concatenation and
-	union of two NFA.
-
-	NFA is also an input of DFA module. DFA module contains methods for 
-	determinisation. Output of DFA module is deterministic finite automata (DFA).
-
-	DFA module contains methods for finding epsilon closure sets, making new 
-	transition function and new set of states.
-
+DETERMINISTIC FINITE AUTOMATA
+-----------------------------
+    The DFA module contains functions for NFA determinisation. The input of the DFA module
+    is provided by the NFA module. The output of the DFA module is a deterministic finite 
+    automaton (DFA). Determinisation is based on an algorithm that constructs an epsilon
+    closure of the input NFA.
 
 MINIMAL FINITE AUTOMATA
 -----------------------
-	Minimal deterministic finite automata (MDFA) is created by module MIN.
-	Input of MIN is DFA from module DFA. Output of module MIN is minimal DFA.
+    The MIN module provides functions for minimization of DFA. The input of the MIN module
+    is a DFA from module DFA. The output of module MIN is a minimal DFA.
 
-	Minimization is based on creating factor classes which represent new states 
-	of MDFA. New set of rules for MDFA transition function is based on rules 
-	contained in DFA transition function and new states of MDFA. 
-
+    Minimization is based on an algorithm that creates factor classes of nondistinguishable states.
+    These factor classes represent the new states of the MDFA. New sets of rules and final states
+    and a starting state are made based on the new states of the MDFA.
 
 MINIMAL FINITE AUTOMATA OUTPUT FORMAT
 -------------------------------------
-	Table representing transition function:
+    Table representing transition function:
 
-	Source  | Dest | Symbols
-	------------------------
-		    |      |
+    Source  | Dest | Symbols
+    ------------------------
+            |      |
 
-	Where Source is start state of a rule, Dest is end state of the rule,
-	Symbols represent symbols in the rule like this:
+    Source is start state of a rule, Dest is the end state of a rule. Symbols 
+    represents a set of symbols by which the transition from Source to Dest is
+    done. The following would be a delta function notation of the transition. 
 
-		(Source, Symbol) -> Dest
+        delta (Source, Symbol) -> Dest
 
-	If more symbols provide transition from the same Source state to the same 
-	Dest state, it can be written the following way:
+    The set of symbols is specified as shown below.
 
-		{a,b,c,d,x}
-	
-	or simply
-	
-		{a-d,x}
+        {a,b,c,d,e} or {a-d,e}
 
-	There is also a special nonterminating state called "trap". Once the
-	automata reach this state it will read all the remaining input symbols and
-	then deny it. 
+    A special non-terminating "trap" state is specified as well. This state
+    serves as a sign that the pattern specified by the MDFA will not be matched,
+    and thus the matching for a given can be terminated.
+
+Interpret
+---------
+    The Interpret module implements a basic MDFA interpreter that matches a line
+    from a given input against a given MDFA. A successful match is determined by
+    a series of transitions of the given MDFA that ends in a final state. Upon a
+    successful match the line on which the match was found is printed. In the
+    case of a unsuccessful match, the first character of the input string (a 
+    line in the first step) is ommitted and the matching is done again. If no
+    match is found on a line, the line is defaultly not printed.
 
 
 EXTENSIONS
 ----------
-	?	The preceding item is optional and matched at most once.
-	+	The preceding item will be matched one or more times.
-
+    ?   The preceding item is optional and matched at most once.
+    +   The preceding item will be matched one or more times.
 
 AUTHORS
 -------
-	xsurov03 - Marek Surovic
-	xstodu05 - Petr Stodulka
-	xpavlu06 - Igor Pavlu
-	xpauli00 - Miroslav Paulik
+    xsurov03 - Marek Surovic
+    xstodu05 - Petr Stodulka
+    xpavlu06 - Igor Pavlu
+    xpauli00 - Miroslav Paulik
