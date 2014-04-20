@@ -61,7 +61,7 @@ MINIMAL FINITE AUTOMATA OUTPUT FORMAT
 
     Source  | Dest | Symbols
     ------------------------
-        |      |
+            |      |
 
     Source is start state of a rule, Dest is the end state of a rule. Symbols 
     represents a set of symbols by which the transition from Source to Dest is
