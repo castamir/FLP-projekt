@@ -73,11 +73,11 @@ MINIMAL FINITE AUTOMATA OUTPUT FORMAT
 	If more symbols provide transition from the same Source state to the same 
 	Dest state, it can be written the following way:
 
-		{a,b,c,e}
+		{a,b,c,d,x}
 	
 	or simply
 	
-		{a-c,e}
+		{a-d,x}
 
 	There is also a special nonterminating state called "trap". Once the
 	automata reach this state it will read all the remaining input symbols and
