@@ -7,7 +7,7 @@
 ##   xpauli00 - Miroslav Paulik
 ######################################################
 
-SOURCE_FILES=DFA.hs Interpreter.hs MIN.hs NFA.hs Parser.hs xsurov03.hs
+SOURCE_FILES=connect6.pl
 SRC=connect6
 NAME=xsurov03
 
@@ -18,5 +18,5 @@ clean:
 	rm -f *.hi *.o *$(NAME).tgz $(NAME) *.exe
 
 pack: clean
-	tar -vzcf flp-fun-xsurov03.tgz $(SOURCE_FILES) Makefile README rozdeleni
+	tar -vzcf flp-log-xsurov03.tgz $(SOURCE_FILES) Makefile README rozdeleni
 
