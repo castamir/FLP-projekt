@@ -123,9 +123,14 @@ gen_random_free(X, Y) :-
 	gen_pos(S, X, Y), % vygeneruj pozici
 	\+ stone(_, X, Y). % test jestli je pozice obsazena
 
+predefMove1(X, Y) :-
+	startStone(X, Y),
+	retract(startStone(X, Y)).
+
 % tah pro first
 move1(X, Y) :-
-	gen_random_free(X, Y),
+	(predefMove1(X, Y);
+	gen_random_free(X, Y)),
 	assert(stone(0, X, Y)). % pridej do db
 
 % tah pro stone
@@ -151,8 +156,13 @@ start :-
 		assert(stone(0, X2, Y2))
 	;
 		L = "START;", % nacetl jsem L takze zacinam
-		assert(stone(0, 10, 10)),  % dam preddefinovany kamen
-		put_line("FIRST:10,10;") % vypisu
+		move1(X,Y),
+		assert(stone(0, X, Y)),  % dam preddefinovany kamen
+
+		number_codes(X, Sx),
+		number_codes(Y, Sy),
+		append(["FIRST:", Sx, ",", Sy, ";"], LL),
+		put_line(LL) % vypisu
 	;
 		halt % jinak koncim
 	),
