@@ -123,7 +123,7 @@ updateStoneCount(N) :-
 	retract(stonesPlayed(X)).
 
 % TESTOVANI KONCE HRY - smerove fce
-checkRowUp(P, N, X, Y) :- 
+checkDown(P, N, X, Y) :- 
 	(	
 		number_codes(N, Sn),
 		put_line(Sn),
@@ -131,108 +131,108 @@ checkRowUp(P, N, X, Y) :-
 		X < 20,
 		stone(P, X, Y),
 		NN is N + 1,
-		checkRowUp(P, NN, X + 1, Y),
+		checkDown(P, NN, X + 1, Y),
 		N is NN
-	);!.
+	);N is N.
 
-checkRowDown(P, N, X, Y) :- 
+checkTop(P, N, X, Y) :- 
 	(	
 		N < 6,
 		X > 0,
 		stone(P, X, Y),
 		NN is N + 1,
-		checkRowDown(P, NN, X - 1, Y),
+		checkTop(P, NN, X - 1, Y),
 		N is NN
 	);!.
 
-checkColUp(P, N, X, Y) :- 
+checkRight(P, N, X, Y) :- 
 	(	
 		N < 6,
 		Y < 20,
 		stone(P, X, Y),
 		NN is N + 1,
-		checkColUp(P, NN, X, Y + 1),
+		checkRight(P, NN, X, Y + 1),
 		N is NN
 	);!.
 
-checkColDown(P, N, X, Y) :- 
+checkLeft(P, N, X, Y) :- 
 	(	
 		N < 6,
 		Y > 0,
 		stone(P, X, Y),
 		NN is N + 1,
-		checkColUp(P, NN, X, Y - 1),
+		checkLeft(P, NN, X, Y - 1),
 		N is NN
 	);!.
 
-checkDiaUp1(P, N, X, Y) :- 
+checkDownRight(P, N, X, Y) :- 
 	(	
 		N < 6,
 		X < 20,
 		Y < 20,
 		stone(P, X, Y),
 		NN is N + 1,
-		checkDiaUp1(P, NN, X + 1, Y + 1),
+		checkDownRight(P, NN, X + 1, Y + 1),
 		N is NN
 	);!.
 
-checkDiaDown1(P, N, X, Y) :- 
+checkTopLeft(P, N, X, Y) :- 
 	(	
 		N < 6,
 		X > 0,
 		Y > 0,
 		stone(P, X, Y),
 		NN is N + 1,
-		checkDiaDown1(P, NN, X - 1, Y - 1),
+		checkTopLeft(P, NN, X - 1, Y - 1),
 		N is NN
 	);!.
 
-checkDiaUp2(P, N, X, Y) :- 
+checkDownLeft(P, N, X, Y) :- 
 	(	
 		N < 6,
 		X < 20,
 		Y > 0,
 		stone(P, X, Y),
 		NN is N + 1,
-		checkDiaUp2(P, NN, X + 1, Y - 1),
+		checkDownLeft(P, NN, X + 1, Y - 1),
 		N is NN
 	);!.
 
-checkDiaDown2(P, N, X, Y) :- 
+checkTopRight(P, N, X, Y) :- 
 	(	
 		N < 6,
 		X > 0,
 		Y < 20,
 		stone(P, X, Y),
 		NN is N + 1,
-		checkDiaDown1(P, NN, X - 1, Y + 1),
+		checkTopRight(P, NN, X - 1, Y + 1),
 		N is NN
 	);!.
 
 checkAll(P, X, Y) :-
 	(
 		N is 1,
-		checkRowUp(P, N, X, Y),
-		checkRowDown(P, N, X, Y),
+		checkDown(P, N, X, Y),
+		checkTop(P, N, X, Y),
 		N = 6
 	) ;
 	(
 		N is 1,
-		checkColUp(P, N, X, Y),
-		checkColDown(P, N, X, Y),
+		checkRight(P, N, X, Y),
+		checkLeft(P, N, X, Y),
 		N = 6
 	) ;
 	(
 		N is 1,
-		checkDiaUp1(P, N, X, Y),
-		checkDiaDown1(P, N, X, Y),
+		checkDownRight(P, N, X, Y),
+		checkTopLeft(P, N, X, Y),
 		N = 6
 
 	) ;
 	(
 		N is 1,
-		checkDiaUp2(P, N, X, Y),
-		checkDiaDown2(P, N, X, Y),
+		checkDownLeft(P, N, X, Y),
+		checkTopRight(P, N, X, Y),
 		N = 6
 	).
 
