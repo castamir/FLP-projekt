@@ -13,8 +13,28 @@
 %v5: adapted to new SWI Prolog
 
 :- dynamic stone/3. %db tvorena 3prvkovou entici stone
+:- dynamic startStone/2. % pocatenci tahy
+:- dynamic stonesPlayed/1. % pocet kamenu na desce
 
-board_size(19). 
+board_size(19).
+
+%     0
+%   0   0
+% 0   0   0
+%   0   0
+%     0
+
+startStone(9,11).
+startStone(10,10).
+startStone(10,12).
+startStone(11,9).
+startStone(11,11).
+startStone(11,13).
+startStone(12,10).
+startStone(12,12).
+startStone(13,11).
+
+stonesPlayed(0).
 
 %Reads line from stdin, terminates on LF or EOF.
 %nacte radek po znaku dokud neni konec souboru nebo radku vraci seznam nactenych symbolu
