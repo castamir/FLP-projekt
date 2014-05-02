@@ -124,7 +124,7 @@ updateStoneCount(N) :-
 
 % TESTOVANI KONCE HRY - smerove fce
 checkDown(P, N, X, Y, O) :- 
-	(	
+	(
 		N < 7,
 		X < 20,
 		stone(P, X, Y),
@@ -158,7 +158,7 @@ checkTop(P, N, X, Y, O) :-
 checkAll(P, X, Y) :-
 		N is 1,
 		checkDown(P, N, X, Y, O),
-		%trace,
+		writeln(""),
 		checkTop(P, O, X, Y, O),
 		O > 5 
 	.
