@@ -16,8 +16,10 @@
 :- dynamic startStone/2. % pocatenci tahy
 :- dynamic stonesPlayed/1. % pocet kamenu na desce
 
+% velikost plochy
 board_size(19).
 
+% POCATECNICH 9 KAMENU
 %     0
 %   0   0
 % 0   0   0
@@ -34,7 +36,10 @@ startStone(12,10).
 startStone(12,12).
 startStone(13,11).
 
-stonesPlayed(0).
+% POCATECNI KAMENY END
+
+% odehrane kameny 
+stonesPlayed(0). % max 361
 
 %Reads line from stdin, terminates on LF or EOF.
 %nacte radek po znaku dokud neni konec souboru nebo radku vraci seznam nactenych symbolu
@@ -110,6 +115,129 @@ write_stones(X1, Y1, X2, Y2) :-
 	append(["STONES:", Sx1, ",", Sy1, ";", Sx2, ",", Sy2, ";"], L), % vypis
 	put_line(L).
 
+% zmena celkoveho poctu odehranych kamenu
+updateStoneCount(N) :-
+	stonesPlayed(X),
+	XX = X + N,
+	assert(stonesPlayed(XX)),
+	retract(stonesPlayed(X)).
+
+% TESTOVANI KONCE HRY - smerove fce
+checkRowUp(P, N, X, Y) :- 
+	(	
+		number_codes(N, Sn),
+		put_line(Sn),
+		N < 6,
+		X < 20,
+		stone(P, X, Y),
+		NN is N + 1,
+		checkRowUp(P, NN, X + 1, Y),
+		N is NN
+	);!.
+
+checkRowDown(P, N, X, Y) :- 
+	(	
+		N < 6,
+		X > 0,
+		stone(P, X, Y),
+		NN is N + 1,
+		checkRowDown(P, NN, X - 1, Y),
+		N is NN
+	);!.
+
+checkColUp(P, N, X, Y) :- 
+	(	
+		N < 6,
+		Y < 20,
+		stone(P, X, Y),
+		NN is N + 1,
+		checkColUp(P, NN, X, Y + 1),
+		N is NN
+	);!.
+
+checkColDown(P, N, X, Y) :- 
+	(	
+		N < 6,
+		Y > 0,
+		stone(P, X, Y),
+		NN is N + 1,
+		checkColUp(P, NN, X, Y - 1),
+		N is NN
+	);!.
+
+checkDiaUp1(P, N, X, Y) :- 
+	(	
+		N < 6,
+		X < 20,
+		Y < 20,
+		stone(P, X, Y),
+		NN is N + 1,
+		checkDiaUp1(P, NN, X + 1, Y + 1),
+		N is NN
+	);!.
+
+checkDiaDown1(P, N, X, Y) :- 
+	(	
+		N < 6,
+		X > 0,
+		Y > 0,
+		stone(P, X, Y),
+		NN is N + 1,
+		checkDiaDown1(P, NN, X - 1, Y - 1),
+		N is NN
+	);!.
+
+checkDiaUp2(P, N, X, Y) :- 
+	(	
+		N < 6,
+		X < 20,
+		Y > 0,
+		stone(P, X, Y),
+		NN is N + 1,
+		checkDiaUp2(P, NN, X + 1, Y - 1),
+		N is NN
+	);!.
+
+checkDiaDown2(P, N, X, Y) :- 
+	(	
+		N < 6,
+		X > 0,
+		Y < 20,
+		stone(P, X, Y),
+		NN is N + 1,
+		checkDiaDown1(P, NN, X - 1, Y + 1),
+		N is NN
+	);!.
+
+checkAll(P, X, Y) :-
+	(
+		N is 1,
+		checkRowUp(P, N, X, Y),
+		checkRowDown(P, N, X, Y),
+		N = 6
+	) ;
+	(
+		N is 1,
+		checkColUp(P, N, X, Y),
+		checkColDown(P, N, X, Y),
+		N = 6
+	) ;
+	(
+		N is 1,
+		checkDiaUp1(P, N, X, Y),
+		checkDiaDown1(P, N, X, Y),
+		N = 6
+
+	) ;
+	(
+		N is 1,
+		checkDiaUp2(P, N, X, Y),
+		checkDiaDown2(P, N, X, Y),
+		N = 6
+	).
+
+% TESTOVANI END
+
 % nahodna pozice kamene
 gen_pos(S, X, Y) :-
 	X is random(S) + 1,
@@ -131,7 +259,9 @@ predefMove1(X, Y) :-
 move1(X, Y) :-
 	(predefMove1(X, Y);
 	gen_random_free(X, Y)),
-	assert(stone(0, X, Y)). % pridej do db
+	assert(stone(0, X, Y)), % pridej do db
+	Z = 1,
+	updateStoneCount(Z).
 
 % tah pro stone
 move(X1, Y1, X2, Y2) :-
@@ -150,15 +280,12 @@ start :-
 		append(AC, CS, L), % spoj 2 ratezce a vrat do L
 		get_coords1(CS, X, Y), % ziskej koordinaty 
 		assert(stone(1, X, Y)), % a pridej do db
+		updateStoneCount(1),
 		move(X1, Y1, X2, Y2), % proved tah
-		write_stones(X1, Y1, X2, Y2), % vypis
-		assert(stone(0, X1, Y1)), % pridej do db
-		assert(stone(0, X2, Y2))
+		write_stones(X1, Y1, X2, Y2) % vypis
 	;
 		L = "START;", % nacetl jsem L takze zacinam
 		move1(X,Y),
-		assert(stone(0, X, Y)),  % dam preddefinovany kamen
-
 		number_codes(X, Sx),
 		number_codes(Y, Sy),
 		append(["FIRST:", Sx, ",", Sy, ";"], LL),
@@ -177,13 +304,17 @@ play :-
 		atom_codes('STONES:', AC), % dosel tah soupere STONES do AC
 		append(AC, CS, L), % udelej mi z toho retezec
 		get_coords(CS, X1o, Y1o, X2o, Y2o), % koordinaty kamenu
-
 		assert(stone(1, X1o, Y1o)), % pridej do db
 		assert(stone(1, X2o, Y2o)), 
+		(checkAll(1, X1o, Y1o), LL = "QUIT;", put_line(LL), halt;!),
+		(checkAll(1, X2o, Y2o), LL = "QUIT;", put_line(LL), halt;!),
+		updateStoneCount(2),
 		(retract(startStone(X1o,Y1o));!),
 		(retract(startStone(X2o,Y2o));!),
 		move(X1, Y1, X2, Y2), % hraj
 		write_stones(X1, Y1, X2, Y2), % vypis
+		(checkAll(0, X1, Y1), LL = "QUIT;", put_line(LL), halt;!),
+		(checkAll(0, X2, Y2), LL = "QUIT;", put_line(LL), halt;!),
 		play % a zas znovu
 	;
 		halt
