@@ -123,118 +123,45 @@ updateStoneCount(N) :-
 	retract(stonesPlayed(X)).
 
 % TESTOVANI KONCE HRY - smerove fce
-checkDown(P, N, X, Y) :- 
+checkDown(P, N, X, Y, O) :- 
 	(	
-		number_codes(N, Sn),
-		put_line(Sn),
-		N < 6,
+		N < 7,
 		X < 20,
 		stone(P, X, Y),
-		NN is N + 1,
-		checkDown(P, NN, X + 1, Y),
-		N is NN
-	);N is N.
+		NN is N+1,
+		YY is Y+1,
+		checkDown(P, NN , X, YY, O)
+	); O is N.
 
-checkTop(P, N, X, Y) :- 
+checkTop(P, N, X, Y, O) :- 
 	(	
-		N < 6,
+		N < 7,
 		X > 0,
 		stone(P, X, Y),
-		NN is N + 1,
-		checkTop(P, NN, X - 1, Y),
-		N is NN
-	);!.
+		NN is N+1,
+		YY is Y-1,
+		checkTop(P, NN, X, YY, O)
+	); O is N.
 
-checkRight(P, N, X, Y) :- 
-	(	
-		N < 6,
-		Y < 20,
-		stone(P, X, Y),
-		NN is N + 1,
-		checkRight(P, NN, X, Y + 1),
-		N is NN
-	);!.
+%checkRight(P, N, X, Y, O) :- 
 
-checkLeft(P, N, X, Y) :- 
-	(	
-		N < 6,
-		Y > 0,
-		stone(P, X, Y),
-		NN is N + 1,
-		checkLeft(P, NN, X, Y - 1),
-		N is NN
-	);!.
+%checkLeft(P, N, X, Y, O) :- 
 
-checkDownRight(P, N, X, Y) :- 
-	(	
-		N < 6,
-		X < 20,
-		Y < 20,
-		stone(P, X, Y),
-		NN is N + 1,
-		checkDownRight(P, NN, X + 1, Y + 1),
-		N is NN
-	);!.
+%checkDownRight(P, N, X, Y, O) :- 
 
-checkTopLeft(P, N, X, Y) :- 
-	(	
-		N < 6,
-		X > 0,
-		Y > 0,
-		stone(P, X, Y),
-		NN is N + 1,
-		checkTopLeft(P, NN, X - 1, Y - 1),
-		N is NN
-	);!.
+%checkTopLeft(P, N, X, Y, O) :- 
 
-checkDownLeft(P, N, X, Y) :- 
-	(	
-		N < 6,
-		X < 20,
-		Y > 0,
-		stone(P, X, Y),
-		NN is N + 1,
-		checkDownLeft(P, NN, X + 1, Y - 1),
-		N is NN
-	);!.
+%checkDownLeft(P, N, X, Y, O) :- 
 
-checkTopRight(P, N, X, Y) :- 
-	(	
-		N < 6,
-		X > 0,
-		Y < 20,
-		stone(P, X, Y),
-		NN is N + 1,
-		checkTopRight(P, NN, X - 1, Y + 1),
-		N is NN
-	);!.
+%checkTopRight(P, N, X, Y, O) :- 
 
 checkAll(P, X, Y) :-
-	(
 		N is 1,
-		checkDown(P, N, X, Y),
-		checkTop(P, N, X, Y),
-		N = 6
-	) ;
-	(
-		N is 1,
-		checkRight(P, N, X, Y),
-		checkLeft(P, N, X, Y),
-		N = 6
-	) ;
-	(
-		N is 1,
-		checkDownRight(P, N, X, Y),
-		checkTopLeft(P, N, X, Y),
-		N = 6
-
-	) ;
-	(
-		N is 1,
-		checkDownLeft(P, N, X, Y),
-		checkTopRight(P, N, X, Y),
-		N = 6
-	).
+		checkDown(P, N, X, Y, O),
+		%trace,
+		checkTop(P, O, X, Y, O),
+		O > 5 
+	.
 
 % TESTOVANI END
 
@@ -324,6 +251,11 @@ play :-
 prolog :-
 	prompt(_, ''),
 	start.
+	
+
+
+	%number_codes(B, Sn),
+	%put_line(Sn).
 
 
 
