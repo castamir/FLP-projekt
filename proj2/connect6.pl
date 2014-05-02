@@ -177,8 +177,11 @@ play :-
 		atom_codes('STONES:', AC), % dosel tah soupere STONES do AC
 		append(AC, CS, L), % udelej mi z toho retezec
 		get_coords(CS, X1o, Y1o, X2o, Y2o), % koordinaty kamenu
+
 		assert(stone(1, X1o, Y1o)), % pridej do db
 		assert(stone(1, X2o, Y2o)), 
+		(retract(startStone(X1o,Y1o));!),
+		(retract(startStone(X2o,Y2o));!),
 		move(X1, Y1, X2, Y2), % hraj
 		write_stones(X1, Y1, X2, Y2), % vypis
 		play % a zas znovu
