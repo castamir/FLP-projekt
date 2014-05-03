@@ -225,46 +225,28 @@ checkAll(P, X, Y) :-
 
 %Generovani typu startu
 genStartStones(R) :-
-	( R = 1,
-		assert(startStone(5,5)),
-		assert(startStone(5,6)),
-		assert(startStone(5,7)),
-		assert(startStone(5,8))
-		);
-	( R = 2,
-		assert(startStone(15,15)),
-		assert(startStone(15,14)),
-		assert(startStone(15,13)),
-		assert(startStone(15,12)),
-		assert(startStone(15,11)),
-		assert(startStone(15,10))
-		);
-	( R = 3,
-		assert(startStone(7,14)),
-		assert(startStone(8,14)),
-		assert(startStone(9,14)),
-		assert(startStone(10,14))
-		);
-	( R = 4,
-		assert(startStone(6,5)),
-		assert(startStone(6,6)),
-		assert(startStone(6,7)),
-		assert(startStone(6,8)),
-		assert(startStone(6,9)),
-		assert(startStone(6,10))
+	( R = 5,
+		assert(startStone(11,13)),
+		assert(startStone(13,13)),
+		assert(startStone(12,12))
 		);
 	( R = 5,
-		assert(startStone(6,5)),
-		assert(startStone(7,6)),
-		assert(startStone(8,7)),
-		assert(startStone(9,8))
+		assert(startStone(7,13)),
+		assert(startStone(7,15)),
+		assert(startStone(9,13))
+		);
+	( R = 5,
+		assert(startStone(7,7)),
+		assert(startStone(11,7)),
+		assert(startStone(11,11)),
+		assert(startStone(9,9))
 		);
 	( R = 6,
-		assert(startStone(16,14)),
 		assert(startStone(15,13)),
-		assert(startStone(14,12)),
-		assert(startStone(13,11)),
 		assert(startStone(12,10)),
+		assert(startStone(14,12)),
+		assert(startStone(16,14)),
+		assert(startStone(13,11)),
 		assert(startStone(11,9))
 		).
 
