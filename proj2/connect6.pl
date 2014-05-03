@@ -126,7 +126,7 @@ updateStoneCount(N) :-
 checkDown(P, N, X, Y, O) :- 
 	(
 		N < 7,
-		Y < 20,
+		%Y < 20,
 		stone(P, X, Y),
 		NN is N+1,
 		YY is Y+1,
@@ -137,7 +137,7 @@ checkDown(P, N, X, Y, O) :-
 checkTop(P, N, X, Y, O) :- 
 	(	
 		N < 7,
-		Y > 0,
+		%Y > 0,
 		stone(P, X, Y),
 		NN is N+1,
 		YY is Y-1,
@@ -148,7 +148,7 @@ checkTop(P, N, X, Y, O) :-
 checkRight(P, N, X, Y, O) :- 
 	(	
 		N < 7,
-		X < 20,
+		%X < 20,
 		stone(P, X, Y),
 		NN is N+1,
 		XX is X+1,
@@ -159,7 +159,7 @@ checkRight(P, N, X, Y, O) :-
 checkLeft(P, N, X, Y, O) :- 
 	(	
 		N < 7,
-		X > 0,
+		%X > 0,
 		stone(P, X, Y),
 		NN is N+1,
 		XX is X-1,
@@ -170,8 +170,8 @@ checkLeft(P, N, X, Y, O) :-
 checkDownRight(P, N, X, Y, O) :- 
 	(	
 		N < 7,
-		X < 20,
-		Y < 20,
+		%X < 20,
+		%Y < 20,
 		stone(P, X, Y),
 		NN is N+1,
 		YY is Y+1,
@@ -183,8 +183,8 @@ checkDownRight(P, N, X, Y, O) :-
 checkTopLeft(P, N, X, Y, O) :- 
 	(	
 		N < 7,
-		X > 0,
-		Y > 0,
+		%X > 0,
+		%Y > 0,
 		stone(P, X, Y),
 		NN is N+1,
 		XX is X-1,
@@ -196,8 +196,8 @@ checkTopLeft(P, N, X, Y, O) :-
 checkDownLeft(P, N, X, Y, O) :- 
 	(	
 		N < 7,
-		X > 0,
-		Y < 20,
+		%X > 0,
+		%Y < 20,
 		stone(P, X, Y),
 		NN is N+1,
 		XX is X-1,
@@ -209,8 +209,8 @@ checkDownLeft(P, N, X, Y, O) :-
 checkTopRight(P, N, X, Y, O) :- 
 	(	
 		N < 7,
-		X < 20,
-		Y > 0,
+		%X < 20,
+		%Y > 0,
 		stone(P, X, Y),
 		NN is N+1,
 		YY is Y-1,
