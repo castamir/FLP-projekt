@@ -1,0 +1,31 @@
+1. Najdi nejdelsi posloupnost kamenu sebe a protihrace.
+
+2. Pokud protihracova posloupnost > moje posloupnost:
+    1. Hraj defenzivne na poli v poli 5x5 kolem pocatku protivnikovy nejdelsi posloupnosti.
+
+3. Pokud protihracova posloupnost <= moje posloupnost:
+    1. Hraj ofenzivne na poli v poli 5x5 kolem pocatku moji nejdelsi posloupnosti.
+
+Hraj defenzivne seznam tahu:
+    1. Pokud jsi nepresahl 3 tahy (zanoreni):
+        1. Zahraj tah.
+        2. Zvys hodnotu zanoreni.
+        3. Nech hrat protihrace ofenzivne.
+        4. Uloz hodnotu navracene delky posloupnosti do seznamu vysledku tahu.
+        5. Hraj defenzivne zbytek moznych tahu.
+        6. Vrat nejmensi vysledek tahu ze seznamu vysledku tahu.
+    
+    2. Pokud jsi presahl 3 tahy (zanoreni):
+        1. Vrat nejdelsi posloupnost protihrace.
+
+Hraj ofenzivne seznam tahu:
+    1. Pokud jsi nepresahl 3 tahy (zanoreni):
+        1. Zahraj tah.
+        2. Zvys hodnotu zanoreni.
+        3. Nech hrat protihrace defenzivne.
+        4. Uloz hodnotu navracene delky posloupnosti do seznamu vysledku tahu.
+        5. Hraj ofenzivne zbytek moznych tahu.
+        6. Vrat nejmensi vysledek tahu ze seznamu vysledku tahu.
+
+    2. Pokud jsi presahl 3 tahy (zanoreni):
+        1. Vrat svoji nejdelsi posloupnost.
