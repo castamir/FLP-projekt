@@ -222,7 +222,9 @@ genStartStones(R) :-
 		assert(startStone(15,15)),
 		assert(startStone(15,14)),
 		assert(startStone(15,13)),
-		assert(startStone(15,12))
+		assert(startStone(15,12)),
+		assert(startStone(15,11)),
+		assert(startStone(15,10))
 		);
 	( R = 3,
 		assert(startStone(7,14)),
@@ -234,7 +236,9 @@ genStartStones(R) :-
 		assert(startStone(6,5)),
 		assert(startStone(6,6)),
 		assert(startStone(6,7)),
-		assert(startStone(6,8))
+		assert(startStone(6,8)),
+		assert(startStone(6,9)),
+		assert(startStone(6,10))
 		);
 	( R = 5,
 		assert(startStone(6,5)),
@@ -244,9 +248,11 @@ genStartStones(R) :-
 		);
 	( R = 6,
 		assert(startStone(16,14)),
-		assert(startStone(15,14)),
-		assert(startStone(14,13)),
-		assert(startStone(13,12))
+		assert(startStone(15,13)),
+		assert(startStone(14,12)),
+		assert(startStone(13,11)),
+		assert(startStone(12,10)),
+		assert(startStone(11,9))
 		).
 
 % nahodna pozice kamene
