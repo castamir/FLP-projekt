@@ -126,41 +126,114 @@ updateStoneCount(N) :-
 checkDown(P, N, X, Y, O) :- 
 	(
 		N < 7,
-		X < 20,
+		Y > 0,
 		stone(P, X, Y),
 		NN is N+1,
 		YY is Y+1,
-		checkDown(P, NN , X, YY, O)
-	); O is N.
+		checkDown(P, NN , X, YY, OO),
+		O is OO+1
+	); O is 0.
 
 checkTop(P, N, X, Y, O) :- 
 	(	
 		N < 7,
-		X > 0,
+		Y > 0,
 		stone(P, X, Y),
 		NN is N+1,
 		YY is Y-1,
-		checkTop(P, NN, X, YY, O)
-	); O is N.
+		checkTop(P, NN, X, YY, OO),
+		O is OO+1
+	); O is 0.
 
-%checkRight(P, N, X, Y, O) :- 
+checkRight(P, N, X, Y, O) :- 
+	(	
+		N < 7,
+		Y > 0,
+		stone(P, X, Y),
+		NN is N+1,
+		XX is X+1,
+		checkRight(P, NN, XX, Y, OO),
+		O is OO+1
+	); O is 0.
 
-%checkLeft(P, N, X, Y, O) :- 
+checkLeft(P, N, X, Y, O) :- 
+	(	
+		N < 7,
+		Y > 0,
+		stone(P, X, Y),
+		NN is N+1,
+		XX is X-1,
+		checkLeft(P, NN, XX, Y, OO),
+		O is OO+1
+	); O is 0.
 
-%checkDownRight(P, N, X, Y, O) :- 
+checkDownRight(P, N, X, Y, O) :- 
+	(	
+		N < 7,
+		Y > 0,
+		stone(P, X, Y),
+		NN is N+1,
+		YY is Y+1,
+		XX is X+1,
+		checkDownRight(P, NN, XX, YY, OO),
+		O is OO+1
+	); O is 0. 
 
-%checkTopLeft(P, N, X, Y, O) :- 
+checkTopLeft(P, N, X, Y, O) :- 
+	(	
+		N < 7,
+		Y > 0,
+		stone(P, X, Y),
+		NN is N+1,
+		XX is X-1,
+		YY is Y-1,
+		checkTopLeft(P, NN, XX, YY, OO),
+		O is OO+1
+	); O is 0.
 
-%checkDownLeft(P, N, X, Y, O) :- 
+checkDownLeft(P, N, X, Y, O) :- 
+	(	
+		N < 7,
+		Y > 0,
+		stone(P, X, Y),
+		NN is N+1,
+		XX is X-1,
+		YY is Y+1,
+		checkDownLeft(P, NN, XX, YY, OO),
+		O is OO+1
+	); O is 0.
 
-%checkTopRight(P, N, X, Y, O) :- 
+checkTopRight(P, N, X, Y, O) :- 
+	(	
+		N < 7,
+		Y > 0,
+		stone(P, X, Y),
+		NN is N+1,
+		YY is Y-1,
+		XX is X+1,
+		checkTopRight(P, NN, XX, YY, OO),
+		O is OO+1
+	); O is 0. 
 
 checkAll(P, X, Y) :-
-		N is 1,
-		checkDown(P, N, X, Y, O),
-		writeln(""),
-		checkTop(P, O, X, Y, O),
-		O > 5 
+%trace,
+	(
+		checkDown(P, 0, X, Y, O1),
+		checkTop(P, O1, X, Y, O2),
+		O2 > 5
+	);(
+		checkRight(P, 0, X, Y, O1),
+		checkLeft(P, O1, X, Y, O2),
+		O2 > 5
+	);(
+		checkDownRight(P, 0, X, Y, O1),
+		checkTopLeft(P, O1, X, Y, O2),
+		O2 > 5
+	);(
+		checkDownLeft(P, 0, X, Y, O1),
+		checkTopRight(P, O1, X, Y, O2),
+		O2 > 5
+	) 
 	.
 
 % TESTOVANI END
@@ -227,21 +300,22 @@ play :-
 	(
 		atom_codes('QUIT;', AC), % je konec? 
 		L == AC, halt % je konec
-	;
+	;	
 		atom_codes('STONES:', AC), % dosel tah soupere STONES do AC
 		append(AC, CS, L), % udelej mi z toho retezec
 		get_coords(CS, X1o, Y1o, X2o, Y2o), % koordinaty kamenu
 		assert(stone(1, X1o, Y1o)), % pridej do db
 		assert(stone(1, X2o, Y2o)), 
-		(checkAll(1, X1o, Y1o), LL = "QUIT;", put_line(LL), halt;!),
-		(checkAll(1, X2o, Y2o), LL = "QUIT;", put_line(LL), halt;!),
+		%trace,
+		(checkAll(1, X1o, Y1o), LL = "QUIT;", put_line(LL), halt;true),
+		%(checkAll(1, X2o, Y2o), LL = "QUIT;", put_line(LL), halt;!),
 		updateStoneCount(2),
 		(retract(startStone(X1o,Y1o));!),
 		(retract(startStone(X2o,Y2o));!),
 		move(X1, Y1, X2, Y2), % hraj
 		write_stones(X1, Y1, X2, Y2), % vypis
-		(checkAll(0, X1, Y1), LL = "QUIT;", put_line(LL), halt;!),
-		(checkAll(0, X2, Y2), LL = "QUIT;", put_line(LL), halt;!),
+		%(checkAll(0, X1, Y1), LL = "QUIT;", put_line(LL), halt;!),
+		%(checkAll(0, X2, Y2), LL = "QUIT;", put_line(LL), halt;!),
 		play % a zas znovu
 	;
 		halt
