@@ -15,12 +15,25 @@
 :- dynamic stone/3. %db tvorena 3prvkovou entici stone
 :- dynamic startStone/2. % pocatenci tahy
 :- dynamic stonesPlayed/1. % pocet kamenu na desce
+:- dynamic t_timeout/1.
 
 % velikost plochy
 board_size(19).
 
 % odehrane kameny 
 stonesPlayed(0). % max 361
+
+timeout :-
+  t_timeout(DT) -> (
+    get_time(TS),
+    TS >= DT -> true ; false
+  ) ; false.
+
+timeout(T) :-
+  (retract(t_timeout(_)) -> true ; true ),
+  get_time(TS),
+  DT is TS + T,
+  assert(t_timeout(DT)).
 
 %Reads line from stdin, terminates on LF or EOF.
 %nacte radek po znaku dokud neni konec souboru nebo radku vraci seznam nactenych symbolu
