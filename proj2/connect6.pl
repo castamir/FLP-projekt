@@ -19,25 +19,6 @@
 % velikost plochy
 board_size(19).
 
-% POCATECNICH 9 KAMENU
-%     0
-%   0   0
-% 0   0   0
-%   0   0
-%     0
-
-startStone(9,11).
-startStone(10,10).
-startStone(10,12).
-startStone(11,9).
-startStone(11,11).
-startStone(11,13).
-startStone(12,10).
-startStone(12,12).
-startStone(13,11).
-
-% POCATECNI KAMENY END
-
 % odehrane kameny 
 stonesPlayed(0). % max 361
 
@@ -220,7 +201,6 @@ checkTopRight(P, N, X, Y, O) :-
 	); O is 0. 
 
 checkAll(P, X, Y) :-
-%trace,
 	(
 		checkDown(P, 0, X, Y, O1),
 		checkTop(P, O1, X, Y, O2),
@@ -241,6 +221,45 @@ checkAll(P, X, Y) :-
 	.
 
 % TESTOVANI END
+
+%Generovani typu startu
+genStartStones(R) :-
+	( R = 1,
+		assert(startStone(5,5)),
+		assert(startStone(5,6)),
+		assert(startStone(5,7)),
+		assert(startStone(5,8))
+		);
+	( R = 2,
+		assert(startStone(15,15)),
+		assert(startStone(15,14)),
+		assert(startStone(15,13)),
+		assert(startStone(15,12))
+		);
+	( R = 3,
+		assert(startStone(7,14)),
+		assert(startStone(8,14)),
+		assert(startStone(9,14)),
+		assert(startStone(10,14))
+		);
+	( R = 4,
+		assert(startStone(6,5)),
+		assert(startStone(6,6)),
+		assert(startStone(6,7)),
+		assert(startStone(6,8))
+		);
+	( R = 5,
+		assert(startStone(6,5)),
+		assert(startStone(7,6)),
+		assert(startStone(8,7)),
+		assert(startStone(9,8))
+		);
+	( R = 6,
+		assert(startStone(16,14)),
+		assert(startStone(15,14)),
+		assert(startStone(14,13)),
+		assert(startStone(13,12))
+		).
 
 % nahodna pozice kamene
 gen_pos(S, X, Y) :-
@@ -310,9 +329,8 @@ play :-
 		get_coords(CS, X1o, Y1o, X2o, Y2o), % koordinaty kamenu
 		assert(stone(1, X1o, Y1o)), % pridej do db
 		assert(stone(1, X2o, Y2o)), 
-		%trace,
 		(checkAll(1, X1o, Y1o), LL = "QUIT;", put_line(LL), halt;true),
-		%(checkAll(1, X2o, Y2o), LL = "QUIT;", put_line(LL), halt;!),
+		(checkAll(1, X2o, Y2o), LL = "QUIT;", put_line(LL), halt;!),
 		updateStoneCount(2),
 		(retract(startStone(X1o,Y1o));!),
 		(retract(startStone(X2o,Y2o));!),
@@ -328,6 +346,8 @@ play :-
 %entry point
 prolog :-
 	prompt(_, ''),
+	R is random(6) + 1,
+	genStartStones(R),
 	start.
 	
 
