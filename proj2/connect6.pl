@@ -318,8 +318,8 @@ play :-
 		(retract(startStone(X2o,Y2o));!),
 		move(X1, Y1, X2, Y2), % hraj
 		write_stones(X1, Y1, X2, Y2), % vypis
-		%(checkAll(0, X1, Y1), LL = "QUIT;", put_line(LL), halt;!),
-		%(checkAll(0, X2, Y2), LL = "QUIT;", put_line(LL), halt;!),
+		(checkAll(0, X1, Y1), LL = "QUIT;", put_line(LL), halt;!),
+		(checkAll(0, X2, Y2), LL = "QUIT;", put_line(LL), halt;!),
 		play % a zas znovu
 	;
 		halt
