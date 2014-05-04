@@ -1,0 +1,41 @@
+Zahajeni hry
+------------
+Pri zahajeni hry jsou kameny pokladany na zaklade preddefinovanych strategii.
+Strategie pro zahajeni hry jsou vlozeny do databaze na zaklade predikatu
+genStartStones, ktery jako argument prijima celociselnou hodnotu, ktera urcuje
+ktera strategie bude zvolena. Tato hodnota je generovana nahodne.
+
+?????????? preruseni strategie
+
+
+Prohledavani stavoveho prostoru a heuristiky
+--------------------------------------------
+Cilem hry connect6 je sestaveni neprerusene posloupnosti sesti kamenu a to
+ve sloupci, radku ci diagonale. Tedy ohodnoceni stavu hry je odvozeno od
+delek posloupnosti kamenu ve hre.
+
+Jestlize delka nejdelsi neuzavrene posloupnosti AI-hrace je vetsi nez delka
+nejdelsi neuzavrene posloupnosti protihrace, je zvolena offenzivni strategie
+prohledavani stavoveho prostoru hry. V opacnem pripade je zvolena defenzivni
+strategie. Pro prohledavani stavoveho prostoru je pouzivan algoritmus minmax.
+
+Ofenzivni strategie
+-------------------
+Pri ofenzivni strategii jsou uzly AI-hrace jsou nastaveny jako maximalizacni
+a ohodnoceni stavu hry je na zaklade nejdelsi neuzavrene posloupnosti AI-hrace.
+Cilem AI-hrace pri ofenzivni strategii je prodlouzeni nejdelsi posloupnosti
+vlastnich kamenu.
+
+Uzly protihrace v ofenzivni strategii jsou nastaveny jako minimalizacni
+a cilem protihrace je zamezeni prodlouzeni nejdelsi posloupnosti kamenu
+AI-hrace.
+
+Defenzivni strategie
+--------------------
+Defenzivni strategie je dualni k ofenzivni strategii. Tedy uzly protihrace
+jsou maximalnizacni, uzly AI-hrace jsou minimalizacni a ohodnoceni stavu hry
+je odvozeno z nejdelsi neuzavrene posloupnosti kamenu protihrace. Cilem
+AI-hrace je zamezeni prodlouzeni nejdelsi posloupnosti kamenu protihrace.
+Cilem protihrace je prodlouzeni nejdelsi neuzavrene posloupnosti vlastnich
+kamenu ve hre.
+
