@@ -322,7 +322,7 @@ play :-
 		(retract(startStone(X1o,Y1o));!),
 		(retract(startStone(X2o,Y2o));!),
 		resolve_strategy(OffensiveStrategy),
-		minimax(1, OffensiveStrategy),
+		minimax(1, 0, 10, 10, OffensiveStrategy),
 		move(X1, Y1, X2, Y2), 							% hraj
 		write_stones(X1, Y1, X2, Y2), 					% vypis
 		play 											% a zas znovu
@@ -405,7 +405,7 @@ resolve_strategy(OffensiveStrategy) :-
 	find_max_in_board(0, 1, 1, 19, 19, 1, 1, 0, DEF_MAX),
 	find_max_in_board(1, 1, 1, 19, 19, 1, 1, 0, OFF_MAX),
 	(
-		(DEF_MAX > OFF_MAX, OffensiveStrategy is false) ; OffensiveStrategy is true
+		(DEF_MAX > OFF_MAX, OffensiveStrategy is 0) ; OffensiveStrategy is 1
 	).
 
 
