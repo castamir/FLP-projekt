@@ -32,7 +32,7 @@ timeout :-
 timeout(T) :-
   (retract(t_timeout(_)) -> true ; true ),
   get_time(TS),
-  DT is TS + T,
+  DT is TS + T - 0.1,
   assert(t_timeout(DT)).
 
 %Reads line from stdin, terminates on LF or EOF.
@@ -410,14 +410,17 @@ get_minimax_range(X, Y, D, Rx1, Ry1, Rx2, Ry2) :-
 %	).
 
 find_max_in_board(P,Xs,Ys,CMAX,MAX, Xm,Ym,Xo,Yo) :-
-	((
-		stone(P,Xs,Ys),
-		checkDown(P, 0, Xs, Ys, D), 
-		checkDownRight(P, 0, Xs, Ys, DR), 
-		checkRight(P, 0, Xs, Ys, R), 
-		checkTopRight(P, 0, Xs, Ys, TR),
-		max_list([CMAX, D, DR, R, TR], MMAX)
-	) ; MMAX is CMAX),
+	(
+		(
+			stone(P,Xs,Ys),
+			checkDown(P, 0, Xs, Ys, D), 
+			checkDownRight(P, 0, Xs, Ys, DR), 
+			checkRight(P, 0, Xs, Ys, R), 
+			checkTopRight(P, 0, Xs, Ys, TR),
+			max_list([CMAX, D, DR, R, TR], MMAX)
+		) ; 
+		MMAX is CMAX
+	),
 	( 
 		Ys < 19,
 		(
