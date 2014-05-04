@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python2
 # -*- coding: utf-8 -*-
 #
 # If you would like to run it on merlin, please use python2.4 instead.
@@ -15,6 +15,7 @@ from subprocess import Popen, PIPE
 from time import time
 
 try:
+    import pygtk
     import gtk
 except ImportError:
     print("PyGTK is available to python2.4 on Merlin, run it like this:\n")
