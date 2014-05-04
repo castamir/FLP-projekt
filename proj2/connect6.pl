@@ -321,8 +321,8 @@ play :-
 		updateStoneCount(2),
 		(retract(startStone(X1o,Y1o));!),
 		(retract(startStone(X2o,Y2o));!),
-		resolve_strategy(OffensiveStrategy),
-		minimax(1, 0, 10, 10, OffensiveStrategy),
+		resolve_strategy(OffensiveStrategy, Xc, Yc),
+		minimax(1, 0, Xc, Yc, OffensiveStrategy),
 		move(X1, Y1, X2, Y2), 							% hraj
 		write_stones(X1, Y1, X2, Y2), 					% vypis
 		play 											% a zas znovu
@@ -365,7 +365,7 @@ get_minimax_range(X, Y, D, Rx1, Ry1, Rx2, Ry2) :-
 
 % prohleda celou desku a hleda pro daneho hrace maximalni delku rady
 % TODO navratova hodnota souradnice maxima
-find_max_in_board(P, Xs, Ys, Xe, Ye, X, Y, CMAX, MAX) :-
+find_max_in_board(P, X, Y, CMAX, MAX, Xs, Ys) :-
 	checkDown(P, 0, X, Y, D), 
 	checkDownRight(P, 0, X, Y, DR), 
 	checkRight(P, 0, X, Y, R), 
@@ -373,19 +373,30 @@ find_max_in_board(P, Xs, Ys, Xe, Ye, X, Y, CMAX, MAX) :-
 	max_list([CMAX, D, DR, R, TR], MMAX),
 	(
 		(
-			X = Xe,
-			Y = Ye,
-			MAX is MMAX
+			X = 19,
+			Y = 19,
+			MAX is MMAX,
+			Xs is 0,
+			Ys is 0
 		);(
-			X < Xe,
-			Y = Ye,
-			XX is X+1,
-			YY is Ys,
-			find_max_in_board(P, Xs, Ys, Xe, Ye, XX, YY, MMAX, MAX)
-		);(
-			XX is X,
-			YY is Y+1,
-			find_max_in_board(P, Xs, Ys, Xe, Ye, XX, YY, MMAX, MAX)
+			(
+				X < 19,
+				Y = 19,
+				XX is X+1,
+				YY is 1,
+				find_max_in_board(P, XX, YY, MMAX, MAX, Xs, Ys)
+			);(
+				XX is X,
+				YY is Y+1,
+				find_max_in_board(P, XX, YY, MMAX, MAX, Xs, Ys)
+			),
+			(
+				(
+					MMAX > CMAX,
+					Xs is X,
+					Ys is Y
+				);!
+			)
 		)
 	).
 
@@ -401,11 +412,21 @@ minimax(P1, P2, X, Y, Strategy) :-
 
 % volba strategie na zaklade stavu desky (kdo ma navrh)
 % vede-li souper, zvoli se obrana strategie, jinak utocna
-resolve_strategy(OffensiveStrategy) :-
-	find_max_in_board(0, 1, 1, 19, 19, 1, 1, 0, DEF_MAX),
-	find_max_in_board(1, 1, 1, 19, 19, 1, 1, 0, OFF_MAX),
+resolve_strategy(OffensiveStrategy, X, Y) :-
+	find_max_in_board(0, 1, 1, 0, DEF_MAX, Xd, Yd),
+	find_max_in_board(1, 1, 1, 0, OFF_MAX, Xo, Yo),
 	(
-		(DEF_MAX > OFF_MAX, OffensiveStrategy is 0) ; OffensiveStrategy is 1
+		(
+			DEF_MAX > OFF_MAX,
+			OffensiveStrategy is 0,
+			X is Xd,
+			Y is Yd
+
+		) ; (
+			OffensiveStrategy is 1,
+			X is Xo,
+			Y is Yo
+		)
 	).
 
 
