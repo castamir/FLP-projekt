@@ -547,6 +547,7 @@ prolog :-
 	prompt(_, ''),
 
 
-	R is random(4) + 1,
+	%R is random(4) + 1,
+	R is 4,
 	genStartStones(R),
 	start.

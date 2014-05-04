@@ -1,7 +1,7 @@
 Zahajeni hry
 ------------
-Pri zahajeni hry jsou kameny pokladany na zaklade preddefinovanych strategii.
-Strategie pro zahajeni hry jsou vlozeny do databaze na zaklade predikatu
+Pri zahajeni hry jsou kameny pokladany na zaklade jedne z preddefinovanych
+strategii. Strategie pro zahajeni hry jsou vlozeny do databaze na zaklade predikatu
 genStartStones, ktery jako argument prijima celociselnou hodnotu, ktera urcuje
 ktera strategie bude zvolena. Tato hodnota je generovana nahodne.
 
@@ -11,7 +11,7 @@ Cilem hry connect6 je sestaveni neprerusene posloupnosti sesti kamenu a to
 ve sloupci, radku ci diagonale. Tedy ohodnoceni stavu hry je odvozeno od
 delek posloupnosti kamenu ve hre.
 
-Jestlize delka nejdelsi neuzavrene posloupnosti AI-hrace je vetsi nez delka
+Jestlize delka nejdelsi neuzavrene posloupnosti AI-hrace je vetsi nebo rovna delce
 nejdelsi neuzavrene posloupnosti protihrace, je zvolena offenzivni strategie
 prohledavani stavoveho prostoru hry. V opacnem pripade je zvolena defenzivni
 strategie. Pro prohledavani stavoveho prostoru je pouzivan algoritmus minmax.
@@ -50,6 +50,8 @@ vracena odpoved v podobe nejlepsiho nalezeneho tahu.
 
 Pokud posloupnost nelze prodlouzit, tak je tato posloupnost ignorovana a pole
 5x5 je ustaveno dle jine posloupnosti.
+
+
 
 Implementace
 ------------
