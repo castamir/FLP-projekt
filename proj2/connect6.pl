@@ -273,7 +273,7 @@ move1(X, Y) :-
 
 moveMinmax(X1,Y1,X2,Y2) :- 
 	resolve_strategy(OffensiveStrategy, Xc, Yc),
-	get_minimax_range(Xc, Yc, 4, Rx1, Ry1, Rx2, Ry2),
+	get_minimax_range(Xc, Yc, 19, Rx1, Ry1, Rx2, Ry2),
 	minmax(0, 1, Xc, Yc, OffensiveStrategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2),
 
 	assert(stone(0,X1,Y1)),
@@ -501,10 +501,10 @@ minmax(P1, P2, X, Y, Strategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) :-
 	(
 		(
 			Strategy = 1,
-			find_max_in_board(P2, 1, 1, 1,1,19,19, 0, _, Xd, Yd),
+			find_max_in_board(P2, 1, 1, Rx1, Ry1, Rx2, Ry2, 0, _, Xd, Yd),
 			assert(stone(P1,Xd, Yd))
 		); (
-			find_max_in_board(P1, 1, 1, 1,1,19,19, 0, _, Xd, Yd),
+			find_max_in_board(P1, 1, 1, Rx1, Ry1, Rx2, Ry2, 0, _, Xd, Yd),
 			assert(stone(P1,Xd, Yd))
 		)
 	),
@@ -547,7 +547,6 @@ prolog :-
 	prompt(_, ''),
 
 
-	%R is random(4) + 1,
-	R is 4,
+	R is random(4) + 1,
 	genStartStones(R),
 	start.
