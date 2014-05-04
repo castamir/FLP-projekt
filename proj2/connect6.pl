@@ -371,114 +371,162 @@ get_minimax_range(X, Y, D, Rx1, Ry1, Rx2, Ry2) :-
 		)
 	).
 
+checkCLosedRow(X, Y, N, DX, DY, NN, Xo, Yo) :-
+	(
+		XX = X + DX * (N + 1),
+		YY = Y + DY * (N + 1),
+		XX > 0,
+		XX < 20,
+		YY > 0,
+		YY < 20,
+		\+ stone(_, XX ,YY),
+		NN is N + 1,
+		Xo is XX,
+		Yo is YY
+	);(
+		XX is X - DX,
+		YY is Y - DY,
+		XX > 0,
+		XX < 20,
+		YY > 0,
+		YY < 20,
+		\+ stone(_, XX ,YY),
+		NN is N + 1,
+		Xo is XX,
+		Yo is YY
+	) ; (
+		NN is 0,
+		Xo is 0,
+		Yo is 0
+	).
 
-% prohleda celou desku a hleda pro daneho hrace maximalni delku rady
-% TODO navratova hodnota souradnice maxima
-%find_max_in_board(P, X, Y, CMAX, MAX, Xs, Ys) :-
-%	checkDown(P, 0, X, Y, D), 
-%	checkDownRight(P, 0, X, Y, DR), 
-%	checkRight(P, 0, X, Y, R), 
-%	checkTopRight(P, 0, X, Y, TR),
-%	max_list([CMAX, D, DR, R, TR], MMAX),
-%	(
-%		(
-%			X = 19,
-%			Y = 19,
-%			MAX is CMAX,
-%			Xs is 0,
-%			Ys is 0
-%		);(
-%			(
-%				X < 19,
-%				Y = 19,
-%				XX is X+1,
-%				YY is 1,
-%				find_max_in_board(P, XX, YY, MMAX, MAX, Xs, Ys)
-%			);(
-%				XX is X,
-%				YY is Y+1,
-%				find_max_in_board(P, XX, YY, MMAX, MAX, Xs, Ys)
-%			),
-%			(
-%				(
-%					MMAX > CMAX,
-%					Xs is X,
-%					Ys is Y
-%				);!
-%			)
-%		)
-%	).
 
-find_max_in_board(P,Xs,Ys,CMAX,MAX, Xm,Ym,Xo,Yo) :-
+find_max_in_board(P,Xs,Ys,BXs,BYs,BXe,BYe,CMAX,MAX, Xm,Ym,Xo,Yo) :-
 	(
 		(
 			stone(P,Xs,Ys),
 			checkDown(P, 0, Xs, Ys, D), 
+			checkCLosedRow(Xs,Ys, D, 0, -1, ND, Xn1, Yn1),
 			checkDownRight(P, 0, Xs, Ys, DR), 
+			checkCLosedRow(Xs,Ys, DR, 1, -1, NDR, Xn2, Yn2),
 			checkRight(P, 0, Xs, Ys, R), 
+			checkCLosedRow(Xs,Ys, R, 0, 1, NR, Xn3, Yn3),
 			checkTopRight(P, 0, Xs, Ys, TR),
-			max_list([CMAX, D, DR, R, TR], MMAX)
+			checkCLosedRow(Xs,Ys, TR, 1, 1, NTR, Xn4, Yn4),
+			max_list([CMAX, ND, NDR, NR, NTR], MMAX)
 		) ; 
-		MMAX is CMAX
-	),
-	( 
-		Ys < 19,
 		(
-			MMAX >= CMAX,
-			find_max_in_board(P,Xs,Ys+1,CMAX,MAX,Xm,Ym,Xo,Yo)
-		) ;
-		(
-			find_max_in_board(P,Xs,Ys+1,MMAX,MAX,Xs,Ys,Xo,Yo)
+			MMAX is CMAX,
+			ND is 0,
+			NDR is 0,
+			NR is 0,
+			NTR is 0,
+			Xn1 is 0,
+			Xn2 is 0,
+			Xn3 is 0,
+			Xn4 is 0,
+			Yn1 is 0,
+			Yn2 is 0,
+			Yn3 is 0,
+			Yn4 is 0
 		)
-	);
-	( 
-		Ys = 19,
-		Xs < 19,
-		(
-			MMAX >= CMAX,
-			find_max_in_board(P,Xs+1,1,CMAX,MAX,Xm,Ym,Xo,Yo)
-		) ;
-		(
-			find_max_in_board(P,Xs+1,1,MMAX,MAX,Xs,Ys,Xo,Yo)
+	),
+	XXs is Xs + 1,
+	YYs is Ys+1,
+	(
+		( 
+			Ys < BYe,
+			(
+				MMAX >= CMAX,
+				find_max_in_board(P,Xs,YYs,BXs,BYs,BXe,BYe,CMAX,MAX,Xm,Ym,Xo,Yo)
+			) ;
+			(
+				find_max_in_board(P,Xs,Ys,BXs,BYs,BXe,BYe,MMAX,MAX,Xs,Ys,Xo,Yo)
+			)
+		);
+		( 
+			Ys = BYe,
+			Xs < BXe,
+			(
+				MMAX >= CMAX,
+				find_max_in_board(P,XXs,BYs,BXs,BYs,BXe,BYe,CMAX,MAX,Xm,Ym,Xo,Yo)
+			) ;
+			(
+				find_max_in_board(P,XXs,BYs,BXs,BYs,BXe,BYe,MMAX,MAX,Xs,Ys,Xo,Yo)
+			)
 		)
 	),
 	( % dohledano
-		Xs = 19,
-		Ys = 19,
-		( 
-			MMAX >= CMAX,
+		Xs = BXe,
+		Ys = BYe,
+		( (
+			MMAX > CMAX,
 			MAX is MMAX,
-			Xo is Xs,
-			Yo is Ys	
+			(
+				(
+					MMAX = ND,
+					Xo is Xn1,
+					Yo is Yn1
+				);(
+					MMAX = NDR,
+					Xo is Xn2,
+					Yo is Yn2
+				);(
+					MMAX = NR,
+					Xo is Xn3,
+					Yo is Yn3
+				);(
+					MMAX = NTR,
+					Xo is Xn4,
+					Yo is Yn4
+				)
+			)	
 		); (
 			MAX is CMAX,
 			Xo is Xm,
 			Yo is Ym
-		)
+		))
 	);!.
 
-% minmax
-minmax(P1, P2,N, X, Y, Strategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) :-
-	% writef('rozmer oblasti pro (%d) X=%d Y=%d    je %d,%d : %d,%d\n', [P, X, Y, Rx1, Ry1, Rx2, Ry2]),
-	
+
+% minmax 
+% TODO: osetrit plnou oblast
+minmax(P1, P2, Depth, X, Y, Strategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) :-
+	NextStrategy = 1 - Strategy, 			% Zmena strategie 
+	assert(stone(P1, X, Y)),
 	(
-		N < 3,
-		(Strategy = 1,
-			minmax(P2, P1,N + 1, X, Y, 0, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) 				% P1 and P2 swapped, Strategy negated
+		(
+			Strategy = 1,
+			find_max_in_board(P1, Rx1, Ry1,Rx1,Ry1,Rx2,Ry2, 0, _, 0, 0, Xd, Yd),
+			assert(stone(P1,Xd, Yd))
 		); (
-			minmax(P2, P1,N + 1, X, Y, 1, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2)
+			find_max_in_board(P2, Rx1, Ry1,Rx1,Ry1,Rx2,Ry2, 0, _, 0, 0, Xd, Yd),
+			assert(stone(P1,Xd, Yd))
 		)
-	);!,
-	
-	true.
+	),
+	(
+		(
+			Depth < 3,
+			NDepth is Depth + 1,
+			minmax(P2, P1,NDepth, X, Y, NextStrategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) 
+			
+		);(
+			X1 is X,
+			Y1 is Y,
+			X2 is Xd,
+			Y2 is Yd
+		)
+	),
+	retract(stone(P1, X, Y)),
+	retract(stone(P1, Xd, Yd))
+	.
 
 
 % volba strategie na zaklade stavu desky (kdo ma navrh)
 % vede-li souper, zvoli se obrana strategie, jinak utocna
 resolve_strategy(OffensiveStrategy, X, Y) :-
-	%find_max_in_board(P,Xs,Ys,CMAX,MAX, Xm,Ym,Xo,Yo)
-	find_max_in_board(0, 1, 1, 0, 0, DEF_MAX, 0, 0, Xd, Yd),
-	find_max_in_board(1, 1, 1, 0, 0, OFF_MAX, 0, 0, Xo, Yo),
+	find_max_in_board(0, 1, 1,1,1,19,19, 0, DEF_MAX, 0, 0, Xd, Yd),
+	find_max_in_board(1, 1, 1,1,1,19,19, 0, OFF_MAX, 0, 0, Xo, Yo),
 	(
 		(
 			DEF_MAX > OFF_MAX,
