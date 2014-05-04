@@ -1,16 +1,8 @@
-%Example of random Connect6 player
-%reading stdin and writing stdout.
-%(c) S. Zidek 2013
-
-%"Compilation":
-%	 swipl -q -g prolog -o xdumbo00 -c c6-dumb.pl
-
-%CHANGELOG:
-%v1: removed gtrace & starting whole game, i.e. with FIRST/START message
-%v2: fixed error in get_coords - Sy2 contained semicolon
-%v3: uncommented entry point
-%v4: fixed asserting first stone
-%v5: adapted to new SWI Prolog
+% Authors: 
+% Marek Surovic, xsurov03
+% Petr Stodulka, xstodu05
+% Igor Pavlu, xpavlu06
+% Miroslav Paulik, xpauli00
 
 :- dynamic stone/3. %db tvorena 3prvkovou entici stone
 :- dynamic startStone/2. % pocatenci tahy
@@ -296,11 +288,8 @@ move(X1, Y1, X2, Y2) :-
 		move1(X1, Y1),
 		move1(X2, Y2)
 	); (
-		% moveMinmax(XX1,XY1,XX2,XY2),
 		moveMinmax(X1,Y1,X2,Y2)
-		% writef('doporucene tahy: %d, %d    %d,%d\n', [XX1,XY1,XX2,XY2]),
-		% move1(X1, Y1),
-		% move1(X2, Y2)
+	
 	).
 
 % vypis formatovane lajny ze seznamu symbolu
@@ -394,7 +383,6 @@ checkCLosedRow(X, Y, N, DX, DY, NN, Xo, Yo) :-
 		YY > 0,
 		YY < 20,
 		\+ stone(_, XX ,YY),
-	%writef('mam %d,%d a misto %d,%d je volne\n',[X,Y,XX,YY]),
 		NN is N,
 		Xo is XX,
 		Yo is YY
@@ -406,7 +394,6 @@ checkCLosedRow(X, Y, N, DX, DY, NN, Xo, Yo) :-
 		YY > 0,
 		YY < 20,
 		\+ stone(_, XX ,YY),
-	%writef('mam %d,%d a misto %d,%d je volne\n',[X,Y,XX,YY]),
 		NN is N,
 		Xo is XX,
 		Yo is YY
@@ -418,7 +405,6 @@ checkCLosedRow(X, Y, N, DX, DY, NN, Xo, Yo) :-
 
 
 find_max_in_board(P,Xs,Ys,BXs,BYs,BXe,BYe,CMAX,MAX, Xm,Ym) :-
-	% writef('position %d,%d\n', [Xs,Ys]),
 	(
 		(
 			stone(P,Xs,Ys),
@@ -464,13 +450,11 @@ find_max_in_board(P,Xs,Ys,BXs,BYs,BXe,BYe,CMAX,MAX, Xm,Ym) :-
 			NEW_Ym is BYs
 		);( 
 			Ys < BYe,
-			% writef('varianta 1\n', []),
 			find_max_in_board(P,Xs,YYs,BXs,BYs,BXe,BYe,MMAX,NEW_MAX,NEW_Xm,NEW_Ym)
 		);
 		( 
 			Ys = BYe,
 			Xs < BXe,
-			% writef('varianta 3\n', []),
 			find_max_in_board(P,XXs,BYs,BXs,BYs,BXe,BYe,MMAX,NEW_MAX,NEW_Xm,NEW_Ym)
 		)
 	),
@@ -509,9 +493,9 @@ find_max_in_board(P,Xs,Ys,BXs,BYs,BXe,BYe,CMAX,MAX, Xm,Ym) :-
 	;!.
 
 
-% minmax 
-% TODO: osetrit plnou oblast
+
 minmax(P1, P2, X, Y, Strategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) :-
+	
 	% NextStrategy = 1 - Strategy, 			% Zmena strategie 
 	assert(stone(P1, X, Y)),
 	(
@@ -524,19 +508,7 @@ minmax(P1, P2, X, Y, Strategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) :-
 			assert(stone(P1,Xd, Yd))
 		)
 	),
-	%(
-	%	(
-	%		Depth < 3,
-	%		NDepth is Depth + 1,
-	%		find_max_in_board(P2, Rx1, Ry1, Rx1,Ry1,Rx2,Ry2, 0, _, P2X, P2Y),
-	%		minmax(P2, P1,NDepth, P2X, P2Y, NextStrategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) 
-	%	);(
-	%		X1 is X,
-	%		Y1 is Y,
-	%		X2 is Xd,
-	%		Y2 is Yd
-	%	)
-	%),
+	
 	retract(stone(P1, X, Y)),
 	retract(stone(P1, Xd, Yd)),
 	X1 is X,
@@ -549,11 +521,8 @@ minmax(P1, P2, X, Y, Strategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) :-
 % volba strategie na zaklade stavu desky (kdo ma navrh)
 % vede-li souper, zvoli se obrana strategie, jinak utocna
 resolve_strategy(OffensiveStrategy, X, Y) :-
-	% writef('resolving strategy...\n', []),
 	find_max_in_board(0, 1, 1,1,1,19,19, 0, DEF_MAX, Xd, Yd),
-	% writef('resolving strategy part 1 done, maximum (%d) je v %d,%d\n', [DEF_MAX, Xd, Yd]),
 	find_max_in_board(1, 1, 1,1,1,19,19, 0, OFF_MAX, Xo, Yo),
-	% writef('resolving strategy part 2 done, maximum (%d) je v %d,%d\n', [OFF_MAX, Xo, Yo]),
 	(
 		(
 			DEF_MAX > OFF_MAX,
@@ -581,18 +550,3 @@ prolog :-
 	R is random(4) + 1,
 	genStartStones(R),
 	start.
-	
-
-	%number_codes(B, Sn),
-	%put_line(Sn).
-
-
-
-
-
-%% tento soubor můete ve svých projektech libovolně pouít
-%% PS: minulý rok bylo jedním studentem vytvořeno grafické rozhraní,
-%%     ke staení na https://gist.github.com/izidormatusov/5114798
-%% PS2: zejména při pouívání různých knihoven si dávejte dobrý pozor,
-%%     zda je poadovaná funkce dostupná na referenčním serveru
-%% M. Hyr, 21.3.2014
