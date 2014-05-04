@@ -232,8 +232,10 @@ genStartStones(R) :-
 		);
 	( R = 2,
 		assert(startStone(7,13)),
-		assert(startStone(7,15)),
-		assert(startStone(9,13))
+		% assert(startStone(7,15)),
+		assert(startStone(7,17)),
+		% assert(startStone(9,13))
+		assert(startStone(7,14))
 		);
 	( R = 3,
 		assert(startStone(7,7)),
@@ -278,8 +280,8 @@ move1(X, Y) :-
 
 moveMinmax(X1,Y1,X2,Y2) :- 
 	resolve_strategy(OffensiveStrategy, Xc, Yc),
-	get_minimax_range(Xc, Yc, 2, Rx1, Ry1, Rx2, Ry2),
-	minmax(0, 1, 0, Xc, Yc, OffensiveStrategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2),
+	get_minimax_range(Xc, Yc, 4, Rx1, Ry1, Rx2, Ry2),
+	minmax(0, 1, Xc, Yc, OffensiveStrategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2),
 
 	assert(stone(0,X1,Y1)),
 	assert(stone(0,X2,Y2)),
@@ -292,8 +294,13 @@ move(X1, Y1, X2, Y2) :-
 		startStone(_,_),
 		move1(X1, Y1),
 		move1(X2, Y2)
-	);
-	moveMinmax(X1,Y1,X2,Y2).
+	); (
+		% moveMinmax(XX1,XY1,XX2,XY2),
+		moveMinmax(X1,Y1,X2,Y2)
+		% writef('doporucene tahy: %d, %d    %d,%d\n', [XX1,XY1,XX2,XY2]),
+		% move1(X1, Y1),
+		% move1(X2, Y2)
+	).
 
 % vypis formatovane lajny ze seznamu symbolu
 put_line(L) :-
@@ -377,25 +384,25 @@ get_minimax_range(X, Y, D, Rx1, Ry1, Rx2, Ry2) :-
 
 checkCLosedRow(X, Y, N, DX, DY, NN, Xo, Yo) :-
 	(
-		XX = X + DX * (N + 1),
-		YY = Y + DY * (N + 1),
+		XX = X + DY * N,
+		YY = Y + DX * N,
 		XX > 0,
 		XX < 20,
 		YY > 0,
 		YY < 20,
 		\+ stone(_, XX ,YY),
-		NN is N + 1,
+		NN is N,
 		Xo is XX,
 		Yo is YY
 	);(
-		XX is X - DX,
-		YY is Y - DY,
+		XX is X - DY,
+		YY is Y - DX,
 		XX > 0,
 		XX < 20,
 		YY > 0,
 		YY < 20,
 		\+ stone(_, XX ,YY),
-		NN is N + 1,
+		NN is N,
 		Xo is XX,
 		Yo is YY
 	) ; (
@@ -405,18 +412,24 @@ checkCLosedRow(X, Y, N, DX, DY, NN, Xo, Yo) :-
 	).
 
 
-find_max_in_board(P,Xs,Ys,BXs,BYs,BXe,BYe,CMAX,MAX, Xm,Ym,Xo,Yo) :-
+find_max_in_board(P,Xs,Ys,BXs,BYs,BXe,BYe,CMAX,MAX, Xm,Ym) :-
+	% writef('position %d,%d\n', [Xs,Ys]),
 	(
 		(
 			stone(P,Xs,Ys),
+
 			checkDown(P, 0, Xs, Ys, D), 
-			checkCLosedRow(Xs,Ys, D, 0, -1, ND, Xn1, Yn1),
+			checkCLosedRow(Xs,Ys, D, 1, 0, ND, Xn1, Yn1),
+
 			checkDownRight(P, 0, Xs, Ys, DR), 
-			checkCLosedRow(Xs,Ys, DR, 1, -1, NDR, Xn2, Yn2),
+			checkCLosedRow(Xs,Ys, DR, 1, 1, NDR, Xn2, Yn2),
+
 			checkRight(P, 0, Xs, Ys, R), 
 			checkCLosedRow(Xs,Ys, R, 0, 1, NR, Xn3, Yn3),
+
 			checkTopRight(P, 0, Xs, Ys, TR),
-			checkCLosedRow(Xs,Ys, TR, 1, 1, NTR, Xn4, Yn4),
+			checkCLosedRow(Xs,Ys, TR, -1, 1, NTR, Xn4, Yn4),
+
 			max_list([CMAX, ND, NDR, NR, NTR], MMAX)
 		) ; 
 		(
@@ -438,99 +451,104 @@ find_max_in_board(P,Xs,Ys,BXs,BYs,BXe,BYe,CMAX,MAX, Xm,Ym,Xo,Yo) :-
 	XXs is Xs + 1,
 	YYs is Ys+1,
 	(
-		( 
+		( % dohledano
+			Xs = BXe,
+			Ys = BYe,
+			NEW_MAX is 0,
+			NEW_Xm is BXs,
+			NEW_Ym is BYs
+		);( 
 			Ys < BYe,
-			(
-				MMAX >= CMAX,
-				find_max_in_board(P,Xs,YYs,BXs,BYs,BXe,BYe,CMAX,MAX,Xm,Ym,Xo,Yo)
-			) ;
-			(
-				find_max_in_board(P,Xs,Ys,BXs,BYs,BXe,BYe,MMAX,MAX,Xs,Ys,Xo,Yo)
-			)
+			% writef('varianta 1\n', []),
+			find_max_in_board(P,Xs,YYs,BXs,BYs,BXe,BYe,MMAX,NEW_MAX,NEW_Xm,NEW_Ym)
 		);
 		( 
 			Ys = BYe,
 			Xs < BXe,
-			(
-				MMAX >= CMAX,
-				find_max_in_board(P,XXs,BYs,BXs,BYs,BXe,BYe,CMAX,MAX,Xm,Ym,Xo,Yo)
-			) ;
-			(
-				find_max_in_board(P,XXs,BYs,BXs,BYs,BXe,BYe,MMAX,MAX,Xs,Ys,Xo,Yo)
-			)
+			% writef('varianta 3\n', []),
+			find_max_in_board(P,XXs,BYs,BXs,BYs,BXe,BYe,MMAX,NEW_MAX,NEW_Xm,NEW_Ym)
 		)
 	),
-	( % dohledano
-		Xs = BXe,
-		Ys = BYe,
-		( (
-			MMAX > CMAX,
+	(
+		(
+			NEW_MAX > MMAX,
+			MAX is NEW_MAX,
+			Xm is NEW_Xm,
+			Ym is NEW_Ym
+		);(
+			MMAX = ND,
 			MAX is MMAX,
-			(
-				(
-					MMAX = ND,
-					Xo is Xn1,
-					Yo is Yn1
-				);(
-					MMAX = NDR,
-					Xo is Xn2,
-					Yo is Yn2
-				);(
-					MMAX = NR,
-					Xo is Xn3,
-					Yo is Yn3
-				);(
-					MMAX = NTR,
-					Xo is Xn4,
-					Yo is Yn4
-				)
-			)	
-		); (
-			MAX is CMAX,
-			Xo is Xm,
-			Yo is Ym
-		))
-	);!.
+			Xm is Xn1,
+			Ym is Yn1
+		);(
+			MMAX = NDR,
+			MAX is MMAX,
+			Xm is Xn2,
+			Ym is Yn2
+		);(
+			MMAX = NR,
+			MAX is MMAX,
+			Xm is Xn3,
+			Ym is Yn3
+		);(
+			MMAX = NTR,
+			MAX is MMAX,
+			Xm is Xn4,
+			Ym is Yn4
+		);(
+			MAX is MMAX,
+			Xm is BXs,
+			Ym is BYs
+		)
+	)
+	;!.
 
 
 % minmax 
 % TODO: osetrit plnou oblast
-minmax(P1, P2, Depth, X, Y, Strategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) :-
-	NextStrategy = 1 - Strategy, 			% Zmena strategie 
+minmax(P1, P2, X, Y, Strategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) :-
+	% NextStrategy = 1 - Strategy, 			% Zmena strategie 
 	assert(stone(P1, X, Y)),
 	(
 		(
 			Strategy = 1,
-			find_max_in_board(P1, Rx1, Ry1,Rx1,Ry1,Rx2,Ry2, 0, _, 0, 0, Xd, Yd),
+			find_max_in_board(P1, Rx1, Ry1, Rx1,Ry1,Rx2,Ry2, 0, _, Xd, Yd),
 			assert(stone(P1,Xd, Yd))
 		); (
-			find_max_in_board(P2, Rx1, Ry1,Rx1,Ry1,Rx2,Ry2, 0, _, 0, 0, Xd, Yd),
+			find_max_in_board(P2, Rx1, Ry1, Rx1,Ry1,Rx2,Ry2, 0, _, Xd, Yd),
 			assert(stone(P1,Xd, Yd))
 		)
 	),
-	(
-		(
-			Depth < 3,
-			NDepth is Depth + 1,
-			minmax(P2, P1,NDepth, X, Y, NextStrategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) 
-			
-		);(
-			X1 is X,
-			Y1 is Y,
-			X2 is Xd,
-			Y2 is Yd
-		)
-	),
+	%(
+	%	(
+	%		Depth < 3,
+	%		NDepth is Depth + 1,
+	%		find_max_in_board(P2, Rx1, Ry1, Rx1,Ry1,Rx2,Ry2, 0, _, P2X, P2Y),
+	%		minmax(P2, P1,NDepth, P2X, P2Y, NextStrategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) 
+	%	);(
+	%		X1 is X,
+	%		Y1 is Y,
+	%		X2 is Xd,
+	%		Y2 is Yd
+	%	)
+	%),
 	retract(stone(P1, X, Y)),
-	retract(stone(P1, Xd, Yd))
+	retract(stone(P1, Xd, Yd)),
+	X1 is X,
+	Y1 is Y,
+	X2 is Xd,
+	Y2 is Yd
 	.
 
 
 % volba strategie na zaklade stavu desky (kdo ma navrh)
 % vede-li souper, zvoli se obrana strategie, jinak utocna
 resolve_strategy(OffensiveStrategy, X, Y) :-
-	find_max_in_board(0, 1, 1,1,1,19,19, 0, DEF_MAX, 0, 0, Xd, Yd),
-	find_max_in_board(1, 1, 1,1,1,19,19, 0, OFF_MAX, 0, 0, Xo, Yo),
+	% writef('resolving strategy...\n', []),
+	find_max_in_board(0, 1, 1,1,1,19,19, 0, DEF_MAX, Xd, Yd),
+	% writef('resolving strategy part 1 done, maximum (%d) je v %d,%d\n', [DEF_MAX, Xd, Yd]),
+	find_max_in_board(1, 1, 1,1,1,19,19, 0, OFF_MAX, Xo, Yo),
+	% writef('resolving strategy part 2 done, maximum (%d) je v %d,%d\n', [OFF_MAX, Xo, Yo]),
 	(
 		(
 			DEF_MAX > OFF_MAX,
@@ -551,7 +569,8 @@ prolog :-
 	prompt(_, ''),
 
 
-	R is random(4) + 1,
+	%R is random(4) + 1,
+	R is 2,
 	genStartStones(R),
 	start.
 	
