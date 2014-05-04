@@ -272,13 +272,24 @@ move1(X, Y) :-
 	(predefMove1(X, Y);
 	gen_random_free(X, Y)),
 	assert(stone(0, X, Y)), % pridej do db
-	Z = 1,
-	updateStoneCount(Z).
+	updateStoneCount(1).
+
+moveMinmax(X1,Y1,X2,Y2) :- 
+	resolve_strategy(OffensiveStrategy, Xc, Yc),
+	get_minimax_range(Xc, Yc, 2, Rx1, Ry1, Rx2, Ry2),
+	minmax(0, 1, 0, Xc, Yc, OffensiveStrategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2),
+
+	assert(stone(0,X1,Y1)),
+	assert(stone(0,X2,Y2)),
+	updateStoneCount(2)
+	.
 
 % tah pro stone
 move(X1, Y1, X2, Y2) :-
-	move1(X1, Y1),
-	move1(X2, Y2).
+	(startStone(_,_),
+		move1(X1, Y1),
+		move1(X2, Y2));
+	moveMinmax(X1,Y1,X2,Y2).
 
 % vypis formatovane lajny ze seznamu symbolu
 put_line(L) :-
@@ -321,8 +332,6 @@ play :-
 		updateStoneCount(2),
 		(retract(startStone(X1o,Y1o));!),
 		(retract(startStone(X2o,Y2o));!),
-		resolve_strategy(OffensiveStrategy, Xc, Yc),
-		minimax(1, 0, Xc, Yc, OffensiveStrategy),
 		move(X1, Y1, X2, Y2), 							% hraj
 		write_stones(X1, Y1, X2, Y2), 					% vypis
 		play 											% a zas znovu
@@ -365,56 +374,105 @@ get_minimax_range(X, Y, D, Rx1, Ry1, Rx2, Ry2) :-
 
 % prohleda celou desku a hleda pro daneho hrace maximalni delku rady
 % TODO navratova hodnota souradnice maxima
-find_max_in_board(P, X, Y, CMAX, MAX, Xs, Ys) :-
-	checkDown(P, 0, X, Y, D), 
-	checkDownRight(P, 0, X, Y, DR), 
-	checkRight(P, 0, X, Y, R), 
-	checkTopRight(P, 0, X, Y, TR),
+%find_max_in_board(P, X, Y, CMAX, MAX, Xs, Ys) :-
+%	checkDown(P, 0, X, Y, D), 
+%	checkDownRight(P, 0, X, Y, DR), 
+%	checkRight(P, 0, X, Y, R), 
+%	checkTopRight(P, 0, X, Y, TR),
+%	max_list([CMAX, D, DR, R, TR], MMAX),
+%	(
+%		(
+%			X = 19,
+%			Y = 19,
+%			MAX is CMAX,
+%			Xs is 0,
+%			Ys is 0
+%		);(
+%			(
+%				X < 19,
+%				Y = 19,
+%				XX is X+1,
+%				YY is 1,
+%				find_max_in_board(P, XX, YY, MMAX, MAX, Xs, Ys)
+%			);(
+%				XX is X,
+%				YY is Y+1,
+%				find_max_in_board(P, XX, YY, MMAX, MAX, Xs, Ys)
+%			),
+%			(
+%				(
+%					MMAX > CMAX,
+%					Xs is X,
+%					Ys is Y
+%				);!
+%			)
+%		)
+%	).
+
+find_max_in_board(P,Xs,Ys,CMAX,MAX, Xm,Ym,Xo,Yo) :-
+	checkDown(P, 0, Xs, Ys, D), 
+	checkDownRight(P, 0, Xs, Ys, DR), 
+	checkRight(P, 0, Xs, Ys, R), 
+	checkTopRight(P, 0, Xs, Ys, TR),
 	max_list([CMAX, D, DR, R, TR], MMAX),
-	(
+	( 
+		Ys < 19,
 		(
-			X = 19,
-			Y = 19,
-			MAX is MMAX,
-			Xs is 0,
-			Ys is 0
-		);(
-			(
-				X < 19,
-				Y = 19,
-				XX is X+1,
-				YY is 1,
-				find_max_in_board(P, XX, YY, MMAX, MAX, Xs, Ys)
-			);(
-				XX is X,
-				YY is Y+1,
-				find_max_in_board(P, XX, YY, MMAX, MAX, Xs, Ys)
-			),
-			(
-				(
-					MMAX > CMAX,
-					Xs is X,
-					Ys is Y
-				);!
-			)
+			MMAX >= CMAX,
+			find_max_in_board(P,Xs,Ys+1,CMAX,MAX,Xm,Ym,Xo,Yo)
+		) ;
+		(
+			find_max_in_board(P,Xs,Ys+1,MMAX,MAX,Xs,Ys,Xo,Yo)
 		)
-	).
+	);
+	( 
+		Ys = 19,
+		Xs < 19,
+		(
+			MMAX >= CMAX,
+			find_max_in_board(P,Xs+1,1,CMAX,MAX,Xm,Ym,Xo,Yo)
+		) ;
+		(
+			find_max_in_board(P,Xs+1,1,MMAX,MAX,Xs,Ys,Xo,Yo)
+		)
+	),
+	( % dohledano
+		Xs = 19,
+		Ys = 19,
+		( 
+			MMAX >= CMAX,
+			MAX is MMAX,
+			Xo is Xs,
+			Yo is Ys	
+		); (
+			MAX is CMAX,
+			Xo is Xm,
+			Yo is Ym
+		)
+	);!.
 
-
-% minimax
-minimax(P1, P2, X, Y, Strategy) :-
-	% get_minimax_range(X, Y, 2, Rx1, Ry1, Rx2, Ry2),
+% minmax
+minmax(P1, P2,N, X, Y, Strategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) :-
 	% writef('rozmer oblasti pro (%d) X=%d Y=%d    je %d,%d : %d,%d\n', [P, X, Y, Rx1, Ry1, Rx2, Ry2]),
-
-	% minimax(P2, P1, X, Y, Strategy)   					% P1 and P2 swapped, Strategy negated
-	P1 = 0 ; P2 = 0.
+	
+	(
+		N < 3,
+		(Strategy = 1,
+			minmax(P2, P1,N + 1, X, Y, 0, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) 				% P1 and P2 swapped, Strategy negated
+		); (
+			minmax(P2, P1,N + 1, X, Y, 1, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2)
+		)
+	);!,
+	
+	true.
 
 
 % volba strategie na zaklade stavu desky (kdo ma navrh)
 % vede-li souper, zvoli se obrana strategie, jinak utocna
 resolve_strategy(OffensiveStrategy, X, Y) :-
-	find_max_in_board(0, 1, 1, 0, DEF_MAX, Xd, Yd),
-	find_max_in_board(1, 1, 1, 0, OFF_MAX, Xo, Yo),
+	%find_max_in_board(P,Xs,Ys,CMAX,MAX, Xm,Ym,Xo,Yo)
+	find_max_in_board(0, 1, 1, 0, 0, DEF_MAX, 0, 0, Xd, Yd),
+	find_max_in_board(1, 1, 1, 0, 0, OFF_MAX, 0, 0, Xo, Yo),
 	(
 		(
 			DEF_MAX > OFF_MAX,
