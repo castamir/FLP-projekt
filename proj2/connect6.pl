@@ -269,8 +269,10 @@ predefMove1(X, Y) :-
 
 % tah pro first
 move1(X, Y) :-
-	(predefMove1(X, Y);
-	gen_random_free(X, Y)),
+	(
+		predefMove1(X, Y);
+		gen_random_free(X, Y)
+	),
 	assert(stone(0, X, Y)), % pridej do db
 	updateStoneCount(1).
 
@@ -286,9 +288,11 @@ moveMinmax(X1,Y1,X2,Y2) :-
 
 % tah pro stone
 move(X1, Y1, X2, Y2) :-
-	(startStone(_,_),
+	(
+		startStone(_,_),
 		move1(X1, Y1),
-		move1(X2, Y2));
+		move1(X2, Y2)
+	);
 	moveMinmax(X1,Y1,X2,Y2).
 
 % vypis formatovane lajny ze seznamu symbolu
