@@ -225,23 +225,23 @@ checkAll(P, X, Y) :-
 
 %Generovani typu startu
 genStartStones(R) :-
-	( R = 5,
+	( R = 1,
 		assert(startStone(11,13)),
 		assert(startStone(13,13)),
 		assert(startStone(12,12))
 		);
-	( R = 5,
+	( R = 2,
 		assert(startStone(7,13)),
 		assert(startStone(7,15)),
 		assert(startStone(9,13))
 		);
-	( R = 5,
+	( R = 3,
 		assert(startStone(7,7)),
 		assert(startStone(11,7)),
 		assert(startStone(11,11)),
 		assert(startStone(9,9))
 		);
-	( R = 6,
+	( R = 4,
 		assert(startStone(15,13)),
 		assert(startStone(12,10)),
 		assert(startStone(14,12)),
@@ -313,33 +313,111 @@ play :-
 		atom_codes('QUIT;', AC), % je konec? 
 		L == AC, halt % je konec
 	;	
-		atom_codes('STONES:', AC), % dosel tah soupere STONES do AC
-		append(AC, CS, L), % udelej mi z toho retezec
-		get_coords(CS, X1o, Y1o, X2o, Y2o), % koordinaty kamenu
-		assert(stone(1, X1o, Y1o)), % pridej do db
-		assert(stone(1, X2o, Y2o)), 
-		(checkAll(1, X1o, Y1o), LL = "QUIT;", put_line(LL), halt;true),
-		(checkAll(1, X2o, Y2o), LL = "QUIT;", put_line(LL), halt;!),
+		atom_codes('STONES:', AC), 						% dosel tah soupere STONES do AC
+		append(AC, CS, L), 								% udelej mi z toho retezec
+		get_coords(CS, X1o, Y1o, X2o, Y2o), 			% koordinaty kamenu
+		assert(stone(1, X1o, Y1o)), 					% pridej do db
+		assert(stone(1, X2o, Y2o)),
 		updateStoneCount(2),
 		(retract(startStone(X1o,Y1o));!),
 		(retract(startStone(X2o,Y2o));!),
-		move(X1, Y1, X2, Y2), % hraj
-		write_stones(X1, Y1, X2, Y2), % vypis
-		(checkAll(0, X1, Y1), LL = "QUIT;", put_line(LL), halt;!),
-		(checkAll(0, X2, Y2), LL = "QUIT;", put_line(LL), halt;!),
-		play % a zas znovu
+		resolve_strategy(OffensiveStrategy),
+		minimax(1, OffensiveStrategy),
+		move(X1, Y1, X2, Y2), 							% hraj
+		write_stones(X1, Y1, X2, Y2), 					% vypis
+		play 											% a zas znovu
 	;
 		halt
 	).
 
+
+% ziskej rozmery oblasti
+% D je vzdalenost resp. polomer
+get_minimax_range(X, Y, D, Rx1, Ry1, Rx2, Ry2) :-
+	(
+		(% osetreni X-oveho okraje
+			X - D < 1,
+			Rx1 is 1,
+			Rx2 is 2 * D + 1
+		) ; (
+			X > 19 - D,
+			Rx1 is 19 - 2 * D - 1,
+			Rx2 is 19
+		) ; (
+			Rx1 is X - 2,
+			Rx2 is X + 2
+		)
+	) , (
+		(% osetreni Y-oveho okraje
+			Y - D < 3,
+			Ry1 is 1,
+			Ry2 is 2 * D + 1
+		) ; (
+			X > 19 - D,
+			Ry1 is 19 - 2 * D - 1,
+			Ry2 is 19
+		) ; (
+			Ry1 is Y - 2,
+			Ry2 is Y + 2
+		)
+	).
+
+
+% prohleda celou desku a hleda pro daneho hrace maximalni delku rady
+% TODO navratova hodnota souradnice maxima
+find_max_in_board(P, Xs, Ys, Xe, Ye, X, Y, CMAX, MAX) :-
+	checkDown(P, 0, X, Y, D), 
+	checkDownRight(P, 0, X, Y, DR), 
+	checkRight(P, 0, X, Y, R), 
+	checkTopRight(P, 0, X, Y, TR),
+	max_list([CMAX, D, DR, R, TR], MMAX),
+	(
+		(
+			X = Xe,
+			Y = Ye,
+			MAX is MMAX
+		);(
+			X < Xe,
+			Y = Ye,
+			XX is X+1,
+			YY is Ys,
+			find_max_in_board(P, Xs, Ys, Xe, Ye, XX, YY, MMAX, MAX)
+		);(
+			XX is X,
+			YY is Y+1,
+			find_max_in_board(P, Xs, Ys, Xe, Ye, XX, YY, MMAX, MAX)
+		)
+	).
+
+
+% minimax
+minimax(P1, P2, X, Y, Strategy) :-
+	% get_minimax_range(X, Y, 2, Rx1, Ry1, Rx2, Ry2),
+	% writef('rozmer oblasti pro (%d) X=%d Y=%d    je %d,%d : %d,%d\n', [P, X, Y, Rx1, Ry1, Rx2, Ry2]),
+
+	% minimax(P2, P1, X, Y, Strategy)   					% P1 and P2 swapped, Strategy negated
+	P1 = 0 ; P2 = 0.
+
+
+% volba strategie na zaklade stavu desky (kdo ma navrh)
+% vede-li souper, zvoli se obrana strategie, jinak utocna
+resolve_strategy(OffensiveStrategy) :-
+	find_max_in_board(0, 1, 1, 19, 19, 1, 1, 0, DEF_MAX),
+	find_max_in_board(1, 1, 1, 19, 19, 1, 1, 0, OFF_MAX),
+	(
+		(DEF_MAX > OFF_MAX, OffensiveStrategy is false) ; OffensiveStrategy is true
+	).
+
+
 %entry point
 prolog :-
 	prompt(_, ''),
-	R is random(6) + 1,
+
+
+	R is random(4) + 1,
 	genStartStones(R),
 	start.
 	
-
 
 	%number_codes(B, Sn),
 	%put_line(Sn).
