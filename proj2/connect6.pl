@@ -267,7 +267,8 @@ gen_random_free(X, Y) :-
 
 predefMove1(X, Y) :-
 	startStone(X, Y),
-	retract(startStone(X, Y)).
+	retract(startStone(X, Y)),
+	\+ stone(_, X ,Y).
 
 % tah pro first
 move1(X, Y) :-
@@ -343,8 +344,10 @@ play :-
 		updateStoneCount(2),
 		(retract(startStone(X1o,Y1o));!),
 		(retract(startStone(X2o,Y2o));!),
+		%print2,
 		move(X1, Y1, X2, Y2), 							% hraj
 		write_stones(X1, Y1, X2, Y2), 					% vypis
+		%print2,
 		play 											% a zas znovu
 	;
 		halt
@@ -384,13 +387,14 @@ get_minimax_range(X, Y, D, Rx1, Ry1, Rx2, Ry2) :-
 
 checkCLosedRow(X, Y, N, DX, DY, NN, Xo, Yo) :-
 	(
-		XX = X + DY * N,
-		YY = Y + DX * N,
+		XX is X + DY * N,
+		YY is Y + DX * N,
 		XX > 0,
 		XX < 20,
 		YY > 0,
 		YY < 20,
 		\+ stone(_, XX ,YY),
+	%writef('mam %d,%d a misto %d,%d je volne\n',[X,Y,XX,YY]),
 		NN is N,
 		Xo is XX,
 		Yo is YY
@@ -402,10 +406,11 @@ checkCLosedRow(X, Y, N, DX, DY, NN, Xo, Yo) :-
 		YY > 0,
 		YY < 20,
 		\+ stone(_, XX ,YY),
+	%writef('mam %d,%d a misto %d,%d je volne\n',[X,Y,XX,YY]),
 		NN is N,
 		Xo is XX,
 		Yo is YY
-	) ; (
+	);(
 		NN is 0,
 		Xo is 0,
 		Yo is 0
@@ -512,10 +517,10 @@ minmax(P1, P2, X, Y, Strategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) :-
 	(
 		(
 			Strategy = 1,
-			find_max_in_board(P1, Rx1, Ry1, Rx1,Ry1,Rx2,Ry2, 0, _, Xd, Yd),
+			find_max_in_board(P1, 1, 1, 1,1,19,19, 0, _, Xd, Yd),
 			assert(stone(P1,Xd, Yd))
 		); (
-			find_max_in_board(P2, Rx1, Ry1, Rx1,Ry1,Rx2,Ry2, 0, _, Xd, Yd),
+			find_max_in_board(P2, 1, 1, 1,1,19,19, 0, _, Xd, Yd),
 			assert(stone(P1,Xd, Yd))
 		)
 	),
@@ -562,6 +567,10 @@ resolve_strategy(OffensiveStrategy, X, Y) :-
 			Y is Yo
 		)
 	).
+
+print2 :-
+    findall((A,B,C), stone(A,B,C), Facts),
+    maplist(writeln, Facts).
 
 
 %entry point
