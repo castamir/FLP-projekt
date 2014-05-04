@@ -421,14 +421,14 @@ find_max_in_board(P,Xs,Ys,BXs,BYs,BXe,BYe,CMAX,MAX, Xm,Ym,Xo,Yo) :-
 			NDR is 0,
 			NR is 0,
 			NTR is 0,
-			Xn1 is 0,
-			Xn2 is 0,
-			Xn3 is 0,
-			Xn4 is 0,
-			Yn1 is 0,
-			Yn2 is 0,
-			Yn3 is 0,
-			Yn4 is 0
+			Xn1 is BXs,
+			Xn2 is BXs,
+			Xn3 is BXs,
+			Xn4 is BXs,
+			Yn1 is BYs,
+			Yn2 is BYs,
+			Yn3 is BYs,
+			Yn4 is BYs
 		)
 	),
 	XXs is Xs + 1,
