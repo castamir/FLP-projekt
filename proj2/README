@@ -5,10 +5,7 @@ Strategie pro zahajeni hry jsou vlozeny do databaze na zaklade predikatu
 genStartStones, ktery jako argument prijima celociselnou hodnotu, ktera urcuje
 ktera strategie bude zvolena. Tato hodnota je generovana nahodne.
 
-?????????? preruseni strategie
-
-
-Prohledavani stavoveho prostoru a heuristiky
+Prohledavani stavoveho prostoru
 --------------------------------------------
 Cilem hry connect6 je sestaveni neprerusene posloupnosti sesti kamenu a to
 ve sloupci, radku ci diagonale. Tedy ohodnoceni stavu hry je odvozeno od
@@ -39,3 +36,26 @@ AI-hrace je zamezeni prodlouzeni nejdelsi posloupnosti kamenu protihrace.
 Cilem protihrace je prodlouzeni nejdelsi neuzavrene posloupnosti vlastnich
 kamenu ve hre.
 
+Heuristiky
+----------
+Z duvodu prilis velkeho stavoveho prostoru hry connect6 a omezeneho casu
+na provedeni tahu AI-hrace, je pro algoritmus minmax pouzivano nekolik
+heuristik.
+
+Nejvyznamnejsi heuristikou je omezeni prohledavaneho stavoveho prostoru na
+prostor o rozmerech 5x5 poli se stredem urcenym polohou kamene v posloupnosti,
+dle ktere byla zvolena strategie. V pripade, ze je prohledavani tohoto pole
+dokonceno pred uplynutim casoveho limitu na tah. Do uplynuti casoveho limitu je
+vracena odpoved v podobe nejlepsiho nalezeneho tahu.
+
+Pokud posloupnost nelze prodlouzit, tak je tato posloupnost ignorovana a pole
+5x5 je ustaveno dle jine posloupnosti.
+
+Implementace
+------------
+Z casovych duvodu byla implementovana pouze cast navrhovaneho reseni. AI-hrac je
+schopen provest tah, ktery prodlouzi jeho nejdelsi posloupnost nebo aktivne zamezi
+protihraci prodlouzeni jeho nejdelsi posloupnosti pokud je protihracova nejdelsi
+neuzavrena posloupnost delsi nez nejdelsi neuzavrena posloupnost AI-hrace.
+
+AI-hrac bohuzel nedokaze vyhodnotit mozne reakce protihrace na jeho pripravovany tah.
