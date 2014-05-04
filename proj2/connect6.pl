@@ -274,7 +274,7 @@ predefMove1(X, Y) :-
 move1(X, Y) :-
 	(
 		predefMove1(X, Y);
-		gen_random_free(X, Y)
+		find_max_in_board(1, 1, 1, 1,1,19,19, 0, _, X, Y)
 	),
 	assert(stone(0, X, Y)), % pridej do db
 	updateStoneCount(1).
@@ -517,10 +517,10 @@ minmax(P1, P2, X, Y, Strategy, Rx1, Ry1, Rx2, Ry2, X1,Y1,X2,Y2) :-
 	(
 		(
 			Strategy = 1,
-			find_max_in_board(P1, 1, 1, 1,1,19,19, 0, _, Xd, Yd),
+			find_max_in_board(P2, 1, 1, 1,1,19,19, 0, _, Xd, Yd),
 			assert(stone(P1,Xd, Yd))
 		); (
-			find_max_in_board(P2, 1, 1, 1,1,19,19, 0, _, Xd, Yd),
+			find_max_in_board(P1, 1, 1, 1,1,19,19, 0, _, Xd, Yd),
 			assert(stone(P1,Xd, Yd))
 		)
 	),
@@ -578,8 +578,7 @@ prolog :-
 	prompt(_, ''),
 
 
-	%R is random(4) + 1,
-	R is 2,
+	R is random(4) + 1,
 	genStartStones(R),
 	start.
 	
